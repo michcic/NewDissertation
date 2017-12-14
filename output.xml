@@ -1,0 +1,724 @@
+<VOTABLE version='1.1' xmlns="http://www.ivoa.net/xml/VOTable/v1.1">
+<RESOURCE>
+<DESCRIPTION>HFC Query Interface</DESCRIPTION>
+<INFO name="QUERY_STATUS" value="OK"/>
+<INFO name="EXECUTED_AT" value="2017-12-14 13:31:21"/>
+<INFO name="MAX_RECORD_ALLOWED" value="100000"/>
+<INFO name="QUERY_STRING" ><![CDATA[SELECT VIEW_AR_HQI.INSTITUT,VIEW_AR_HQI.CODE,VIEW_AR_HQI.VERSION,VIEW_AR_HQI.FEATURE_NAME,VIEW_AR_HQI.TARGET_NAME,VIEW_AR_HQI.TARGET_CLASS,VIEW_AR_HQI.ENC_MET,VIEW_AR_HQI.PERSON,VIEW_AR_HQI.CONTACT,VIEW_AR_HQI.REFERENCE,VIEW_AR_HQI.OBSERVAT,VIEW_AR_HQI.INSTRUME,VIEW_AR_HQI.TELESCOP,VIEW_AR_HQI.OBSINST_KEY,VIEW_AR_HQI.UNITS,VIEW_AR_HQI.WAVEMIN,VIEW_AR_HQI.WAVEMAX,VIEW_AR_HQI.WAVENAME,VIEW_AR_HQI.WAVEUNIT,VIEW_AR_HQI.SPECTRAL_DOMAIN,VIEW_AR_HQI.OBS_TYPE,VIEW_AR_HQI.OBS_CAT,VIEW_AR_HQI.DATE_OBS,VIEW_AR_HQI.DATE_END,VIEW_AR_HQI.JDINT,VIEW_AR_HQI.JDFRAC,VIEW_AR_HQI.C_ROTATION,VIEW_AR_HQI.FILENAME,VIEW_AR_HQI.URL,VIEW_AR_HQI.CDELT1,VIEW_AR_HQI.CDELT2,VIEW_AR_HQI.NAXIS1,VIEW_AR_HQI.NAXIS2,VIEW_AR_HQI.CENTER_X,VIEW_AR_HQI.CENTER_Y,VIEW_AR_HQI.R_SUN,VIEW_AR_HQI.BITPIX,VIEW_AR_HQI.BSCALE,VIEW_AR_HQI.BZERO,VIEW_AR_HQI.EXP_TIME,VIEW_AR_HQI.FILE_FORMAT,VIEW_AR_HQI.FILE_SIZE,VIEW_AR_HQI.PROCESSING_LVL,VIEW_AR_HQI.DATA_TYPE,VIEW_AR_HQI.QCLK_URL,VIEW_AR_HQI.QCLK_FNAME,VIEW_AR_HQI.ID_AR,VIEW_AR_HQI.NOAA_NUMBER,VIEW_AR_HQI.FEAT_X_PIX,VIEW_AR_HQI.FEAT_Y_PIX,VIEW_AR_HQI.FEAT_X_ARCSEC,VIEW_AR_HQI.FEAT_Y_ARCSEC,VIEW_AR_HQI.FEAT_HG_LONG_DEG,VIEW_AR_HQI.FEAT_HG_LAT_DEG,VIEW_AR_HQI.FEAT_CARR_LONG_DEG,VIEW_AR_HQI.FEAT_CARR_LAT_DEG,VIEW_AR_HQI.BR_X0_PIX,VIEW_AR_HQI.BR_Y0_PIX,VIEW_AR_HQI.BR_X1_PIX,VIEW_AR_HQI.BR_Y1_PIX,VIEW_AR_HQI.BR_X2_PIX,VIEW_AR_HQI.BR_Y2_PIX,VIEW_AR_HQI.BR_X3_PIX,VIEW_AR_HQI.BR_Y3_PIX,VIEW_AR_HQI.BR_X0_ARCSEC,VIEW_AR_HQI.BR_Y0_ARCSEC,VIEW_AR_HQI.BR_X1_ARCSEC,VIEW_AR_HQI.BR_Y1_ARCSEC,VIEW_AR_HQI.BR_X2_ARCSEC,VIEW_AR_HQI.BR_Y2_ARCSEC,VIEW_AR_HQI.BR_X3_ARCSEC,VIEW_AR_HQI.BR_Y3_ARCSEC,VIEW_AR_HQI.BR_HG_LONG0_DEG,VIEW_AR_HQI.BR_HG_LAT0_DEG,VIEW_AR_HQI.BR_HG_LONG1_DEG,VIEW_AR_HQI.BR_HG_LAT1_DEG,VIEW_AR_HQI.BR_HG_LONG2_DEG,VIEW_AR_HQI.BR_HG_LAT2_DEG,VIEW_AR_HQI.BR_HG_LONG3_DEG,VIEW_AR_HQI.BR_HG_LAT3_DEG,VIEW_AR_HQI.BR_CARR_LONG0_DEG,VIEW_AR_HQI.BR_CARR_LAT0_DEG,VIEW_AR_HQI.BR_CARR_LONG1_DEG,VIEW_AR_HQI.BR_CARR_LAT1_DEG,VIEW_AR_HQI.BR_CARR_LONG2_DEG,VIEW_AR_HQI.BR_CARR_LAT2_DEG,VIEW_AR_HQI.BR_CARR_LONG3_DEG,VIEW_AR_HQI.BR_CARR_LAT3_DEG,VIEW_AR_HQI.FEAT_AREA_PIX,VIEW_AR_HQI.FEAT_AREA_DEG2,VIEW_AR_HQI.FEAT_AREA_MM2,VIEW_AR_HQI.FEAT_MAX_INT,VIEW_AR_HQI.FEAT_MIN_INT,VIEW_AR_HQI.FEAT_MEAN_INT,VIEW_AR_HQI.FEAT_MEAN2QSUN,VIEW_AR_HQI.FEAT_MIN_BZ,VIEW_AR_HQI.FEAT_MAX_BZ,VIEW_AR_HQI.FEAT_MEAN_BZ,VIEW_AR_HQI.FEAT_MEAN_GRAD,VIEW_AR_HQI.FEAT_MEDIAN_GRAD,VIEW_AR_HQI.FEAT_MAX_GRAD,VIEW_AR_HQI.FEAT_LENGTH_NL,VIEW_AR_HQI.FEAT_LENGTH_SG,VIEW_AR_HQI.CC_X_PIX,VIEW_AR_HQI.CC_Y_PIX,VIEW_AR_HQI.CC_X_ARCSEC,VIEW_AR_HQI.CC_Y_ARCSEC,VIEW_AR_HQI.CC,VIEW_AR_HQI.CC_LENGTH,VIEW_AR_HQI.SNAPSHOT,VIEW_AR_HQI.TRACK_ID,VIEW_AR_HQI.PHENOM,VIEW_AR_HQI.REF_FEAT,VIEW_AR_HQI.TRACK_LVL_TRUST FROM VIEW_AR_HQI WHERE  (date_obs>='2010-01-01T00:03:02' and date_obs<='2010-01-01T04:03:02')  AND  ( OBSERVAT='SOHO' ) AND ( INSTRUME='MDI' )    LIMIT 100000]]></INFO>
+<INFO name="QUERY_URL" ><![CDATA[http://voparis-helio.obspm.fr:80/hfc-hqi/HelioQueryService?STARTTIME=2010-01-01T00:03:02&ENDTIME=2010-01-01T04:03:02&WHERE=OBSERVAT,SOHO;INSTRUME,MDI&FROM=VIEW_AR_HQI]]></INFO>
+<TABLE name="hqi-VIEW_AR_HQI">
+<FIELD arraysize="*" datatype="char" name="INSTITUT">
+<DESCRIPTION>Institute responsible for running the FR code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="CODE">
+<DESCRIPTION>Name of the FR code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="VERSION">
+<DESCRIPTION>Version of the FR code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="FEATURE_NAME">
+<DESCRIPTION>Features detected</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="TARGET_NAME">
+<DESCRIPTION>Standard name of target</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="TARGET_CLASS">
+<DESCRIPTION>Type of target</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="ENC_MET">
+<DESCRIPTION>Encoding method (raster, chain code, none...)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="PERSON">
+<DESCRIPTION>Person responsible for running the FR code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="CONTACT">
+<DESCRIPTION>Contact of the person responsible for running the FR code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="REFERENCE">
+<DESCRIPTION>Any reference to a document or article that describes the fr code</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="OBSERVAT">
+<DESCRIPTION>Name of the observatory/spacecraft</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="INSTRUME">
+<DESCRIPTION>Name of the instrument</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="TELESCOP">
+<DESCRIPTION>Name of the sub-part (telescope/receiver)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="OBSINST_KEY">
+<DESCRIPTION>HELIO ICS keyword of the observatory-instrument</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="UNITS">
+<DESCRIPTION>Intensity units on the original observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="WAVEMIN">
+<DESCRIPTION>Minimum wavelength of the observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="WAVEMAX">
+<DESCRIPTION>Maximum wavelength of the observation</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="WAVENAME">
+<DESCRIPTION>Name of the wavelength of the observation</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="WAVEUNIT">
+<DESCRIPTION>Units of the wavelength of the observation</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="SPECTRAL_DOMAIN">
+<DESCRIPTION>Spectral domain covered by the observation</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="OBS_TYPE">
+<DESCRIPTION>Type of observations (i.e., REMOTE-SENSING, IN-SITU, or BOTH)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="OBS_CAT">
+<DESCRIPTION>Category of observatory (i.e, SPACEBORNE, GROUND-BASED, or BOTH)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="DATE_OBS" xtype="iso8601">
+<DESCRIPTION>Start date of the observation</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="DATE_END" xtype="iso8601">
+<DESCRIPTION>End date of the observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="JDINT">
+<DESCRIPTION>Julian day of the observation, integer part</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="double" name="JDFRAC">
+<DESCRIPTION>Julian day of the observation, fraction part</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="C_ROTATION">
+<DESCRIPTION>Carrington rotation</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="FILENAME">
+<DESCRIPTION>Name of the original file</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="URL">
+<DESCRIPTION>URL of the original file</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="CDELT1">
+<DESCRIPTION>Scale of the original observation along X axis</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="CDELT2">
+<DESCRIPTION>Scale of the original observation along Y axis</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="NAXIS1">
+<DESCRIPTION>First dimension of the original image (X)</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="NAXIS2">
+<DESCRIPTION>Second dimension of the original image (Y)</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="double" name="CENTER_X">
+<DESCRIPTION>Reference pixel coordinate along X axis</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="CENTER_Y">
+<DESCRIPTION>Reference pixel coordinate along Y axis</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="R_SUN">
+<DESCRIPTION>Radius of the Sun in pixels</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="BITPIX">
+<DESCRIPTION>Coding of the original image</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="double" name="BSCALE">
+<DESCRIPTION>Coefficient of the scaling equation: physical_values = BZERO + BSCALE x array_values</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BZERO">
+<DESCRIPTION>Offset value of the scaling equation: physical_values = BZERO + BSCALE x array_values</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="EXP_TIME" xtype="iso8601">
+<DESCRIPTION>Exposure time (if available), in seconds and fraction of s</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="FILE_FORMAT">
+<DESCRIPTION>Format of the data file (e.g., FITS, CDF, BINARY, etc.)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FILE_SIZE">
+<DESCRIPTION>Size of the data file in kilobytes</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="PROCESSING_LVL">
+<DESCRIPTION>Data processing level following the CODMAC conventions</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="DATA_TYPE">
+<DESCRIPTION>Type of data (e.g., IMAGE, DYNAMIC SPECTRUM, TIME_SERIES, etc.)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="QCLK_URL">
+<DESCRIPTION>URL of the quicklook image directory</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="QCLK_FNAME">
+<DESCRIPTION>Name of the quicklook image file</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="ID_AR"/>
+<FIELD datatype="int" name="NOAA_NUMBER">
+<DESCRIPTION>NOAA region number</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="FEAT_X_PIX">
+<DESCRIPTION>X image coordinates of the feature gravity centre in pixel</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="FEAT_Y_PIX">
+<DESCRIPTION>Y image coordinates of the AR gravity centre in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="double" name="FEAT_X_ARCSEC">
+<DESCRIPTION>X Heliocentric coordinates of the AR gravity centre in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="FEAT_Y_ARCSEC">
+<DESCRIPTION>Y Heliocentric coordinates of the AR gravity centre in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_HG_LONG_DEG">
+<DESCRIPTION>Heliographic longitude of the AR gravity centre in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_HG_LAT_DEG">
+<DESCRIPTION>Heliographic latitude of the AR gravity centre in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_CARR_LONG_DEG">
+<DESCRIPTION>Carrington longitude of the AR gravity centre in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_CARR_LAT_DEG">
+<DESCRIPTION>Carrington latitude of the AR gravity centre in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="BR_X0_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South East most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_Y0_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South East most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_X1_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North East most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_Y1_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North East most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_X2_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South West most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_Y2_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South West most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_X3_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North West most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="BR_Y3_PIX">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North West most point in pixels</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="double" name="BR_X0_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South East most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_Y0_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South East most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_X1_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North East most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_Y1_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North East most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_X2_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South West most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_Y2_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate South West most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_X3_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North West most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="BR_Y3_ARCSEC">
+<DESCRIPTION>Bounding rectangle heliocentric coordinate North West most point in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LONG0_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate South East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LAT0_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate South East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LONG1_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate North East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LAT1_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate North East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LONG2_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate South West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LAT2_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate South West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LONG3_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate North West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_HG_LAT3_DEG">
+<DESCRIPTION>Bounding rectangle heliographic coordinate North West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LONG0_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate South East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LAT0_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate South East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LONG1_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate North East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LAT1_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate North East most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LONG2_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate South West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LAT2_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate South West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LONG3_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate North West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="BR_CARR_LAT3_DEG">
+<DESCRIPTION>Bounding rectangle Carrington coordinate North West most point in degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="FEAT_AREA_PIX">
+<DESCRIPTION>Number of pixels included in the feature</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_AREA_DEG2">
+<DESCRIPTION>Area of the feature in square degrees</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_AREA_MM2">
+<DESCRIPTION>Area in Mm2 of the AR</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MAX_INT">
+<DESCRIPTION>AR max. intensity value, in units of the original observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MIN_INT">
+<DESCRIPTION>AR min. intensity value, in units of the original observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MEAN_INT">
+<DESCRIPTION>AR mean intensity value in the units of the original observation</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="FEAT_MEAN2QSUN">
+<DESCRIPTION>Mean of the AR to QS instensity ratio</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MIN_BZ">
+<DESCRIPTION>AR min. line-of-sight magnetic field value, in Gauss</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MAX_BZ">
+<DESCRIPTION>AR max. line-of-sight magnetic field value, in Gauss</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MEAN_BZ">
+<DESCRIPTION>AR mean line-of-sight magnetic field value in Gauss</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MEAN_GRAD">
+<DESCRIPTION>Mean of the horizontal gradient polarity separation line (G/Mm)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MEDIAN_GRAD">
+<DESCRIPTION>Median of the horizontal gradient polarity separation line (G/Mm)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_MAX_GRAD">
+<DESCRIPTION>Maximum of the horizontal gradient polarity separation line (G/Mm)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_LENGTH_NL">
+<DESCRIPTION>AR length of the neutral line in Mm</DESCRIPTION>
+</FIELD>
+<FIELD datatype="float" name="FEAT_LENGTH_SG">
+<DESCRIPTION>AR length of the strong gradient of nl above 50G/Mm</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="CC_X_PIX">
+<DESCRIPTION>X coordinate of chain code start position in pixels</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="CC_Y_PIX">
+<DESCRIPTION>Y coordinate of chain code start position in pixels</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="CC_X_ARCSEC">
+<DESCRIPTION>X coordinate of chain code start position in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="CC_Y_ARCSEC">
+<DESCRIPTION>Y coordinate of chain code start position in arcsec</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="CC">
+<DESCRIPTION>Boundary chain code</DESCRIPTION>
+</FIELD>
+<FIELD datatype="int" name="CC_LENGTH">
+<DESCRIPTION>Length of the chain code</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="SNAPSHOT"/>
+<FIELD datatype="int" name="TRACK_ID">
+<DESCRIPTION>Index of the feature during a rotation</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="PHENOM">
+<DESCRIPTION>Number referring to the behaviour of the feature</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="REF_FEAT">
+<DESCRIPTION>Feature on which the phenomen applies</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD datatype="int" name="TRACK_LVL_TRUST">
+<DESCRIPTION>Percentage of confidence of the tracking</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<DATA>
+<TABLEDATA>
+  <TR>
+    <TD>TCD</TD>
+    <TD>SMART</TD>
+    <TD>1.0</TD>
+    <TD>ACTIVE REGIONS</TD>
+    <TD>SUN</TD>
+    <TD>STAR</TD>
+    <TD>CHAINCODE</TD>
+    <TD>Paul Higgins</TD>
+    <TD>pohuigin@gmail.com</TD>
+    <TD>DOI: 10.1016/j.asr.2010.06.024</TD>
+    <TD>SOHO</TD>
+    <TD>MDI</TD>
+    <TD>MAGNETOGRAM</TD>
+    <TD>SOHO__MDI</TD>
+    <TD>Gauss</TD>
+    <TD>676.8</TD>
+    <TD>676.8</TD>
+    <TD>Ni I</TD>
+    <TD>NM</TD>
+    <TD>LINE_OF_SIGHT MAGNETIC FIELD</TD>
+    <TD>REMOTE-SENSING</TD>
+    <TD>SPACEBORNE</TD>
+    <TD>2010-01-01T00:03:02</TD>
+    <TD>2010-01-01T00:03:02</TD>
+    <TD>2455197</TD>
+    <TD>0.502106</TD>
+    <TD>2092</TD>
+    <TD>fd_M_96m_01d.6209.0000.fits</TD>
+    <TD></TD>
+    <TD>1.98561</TD>
+    <TD>1.98561</TD>
+    <TD>1024</TD>
+    <TD>1024</TD>
+    <TD>512.747</TD>
+    <TD>511.601</TD>
+    <TD>496.573</TD>
+    <TD>-32</TD>
+    <TD>1.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>FITS</TD>
+    <TD></TD>
+    <TD>-2147483648</TD>
+    <TD>IMAGE</TD>
+    <TD>ftp://ftpbass2000.obspm.fr/temp/qlk/soho/mdi/2010</TD>
+    <TD>fd_M_96m_01d.6209.0000.png</TD>
+    <TD>570065</TD>
+    <TD>11039</TD>
+    <TD>678</TD>
+    <TD>296</TD>
+    <TD>330.037</TD>
+    <TD>-427.329</TD>
+    <TD>22.6887</TD>
+    <TD>-28.7477</TD>
+    <TD>55.5477</TD>
+    <TD>-28.7477</TD>
+    <TD>624</TD>
+    <TD>259</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>736</TD>
+    <TD>330</TD>
+    <TD>222.0</TD>
+    <TD>-502.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>444.0</TD>
+    <TD>-361.0</TD>
+    <TD>16.4534</TD>
+    <TD>-36.8662</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>31.3871</TD>
+    <TD>-28.8391</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>5966</TD>
+    <TD>83.524</TD>
+    <TD></TD>
+    <TD>2508.49</TD>
+    <TD>-2046.0</TD>
+    <TD>-4.86116</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>96.5111</TD>
+    <TD>82.4894</TD>
+    <TD>260.797</TD>
+    <TD>36.7899</TD>
+    <TD>5.65999</TD>
+    <TD>632</TD>
+    <TD>257</TD>
+    <TD>238.080001831055</TD>
+    <TD>-505.920013427734</TD>
+    <TD>444445444555556556544444444444443444454445455444343444344444544454545544544433334344434444454445555555555656666666666666666767770777777776666666676767777070070000070000000000000007000000000001010111100000000000100101101101010101101111011111221222122222222322111111212122212232223232333434443</TD>
+    <TD>291</TD>
+    <TD>http://solarmonitor.org/phiggins/smart_plots/smart_20100101_0003.png</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+  </TR>
+  <TR>
+    <TD>TCD</TD>
+    <TD>SMART</TD>
+    <TD>1.0</TD>
+    <TD>ACTIVE REGIONS</TD>
+    <TD>SUN</TD>
+    <TD>STAR</TD>
+    <TD>CHAINCODE</TD>
+    <TD>Paul Higgins</TD>
+    <TD>pohuigin@gmail.com</TD>
+    <TD>DOI: 10.1016/j.asr.2010.06.024</TD>
+    <TD>SOHO</TD>
+    <TD>MDI</TD>
+    <TD>MAGNETOGRAM</TD>
+    <TD>SOHO__MDI</TD>
+    <TD>Gauss</TD>
+    <TD>676.8</TD>
+    <TD>676.8</TD>
+    <TD>Ni I</TD>
+    <TD>NM</TD>
+    <TD>LINE_OF_SIGHT MAGNETIC FIELD</TD>
+    <TD>REMOTE-SENSING</TD>
+    <TD>SPACEBORNE</TD>
+    <TD>2010-01-01T01:39:02</TD>
+    <TD>2010-01-01T01:39:02</TD>
+    <TD>2455197</TD>
+    <TD>0.568773</TD>
+    <TD>2092</TD>
+    <TD>fd_M_96m_01d.6209.0001.fits</TD>
+    <TD></TD>
+    <TD>1.98561</TD>
+    <TD>1.98561</TD>
+    <TD>1024</TD>
+    <TD>1024</TD>
+    <TD>512.738</TD>
+    <TD>511.617</TD>
+    <TD>496.576</TD>
+    <TD>-32</TD>
+    <TD>1.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>FITS</TD>
+    <TD></TD>
+    <TD>-2147483648</TD>
+    <TD>IMAGE</TD>
+    <TD>ftp://ftpbass2000.obspm.fr/temp/qlk/soho/mdi/2010</TD>
+    <TD>fd_M_96m_01d.6209.0001.png</TD>
+    <TD>570068</TD>
+    <TD>11039</TD>
+    <TD>684</TD>
+    <TD>296</TD>
+    <TD>341.627</TD>
+    <TD>-427.889</TD>
+    <TD>23.5389</TD>
+    <TD>-28.7743</TD>
+    <TD>55.5199</TD>
+    <TD>-28.7743</TD>
+    <TD>630</TD>
+    <TD>259</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>733</TD>
+    <TD>329</TD>
+    <TD>234.0</TD>
+    <TD>-502.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>438.0</TD>
+    <TD>-363.0</TD>
+    <TD>17.3388</TD>
+    <TD>-36.8195</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>32.2111</TD>
+    <TD>-28.7998</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>5940</TD>
+    <TD>83.16</TD>
+    <TD></TD>
+    <TD>2543.08</TD>
+    <TD>-2032.3</TD>
+    <TD>-5.57868</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>109.15</TD>
+    <TD>98.9177</TD>
+    <TD>259.409</TD>
+    <TD>35.3749</TD>
+    <TD>4.24499</TD>
+    <TD>639</TD>
+    <TD>256</TD>
+    <TD>251.968002319336</TD>
+    <TD>-507.903991699219</TD>
+    <TD>44454445555556554444444544454434444544454554434344434444444544454554545444433334344434454445445555556556566566666666666767676707777777766666666766767770700700000007000000000000000000000000000010111110000000000010010101101101010110111111111212221222222223221111112122212222223222323333434443</TD>
+    <TD>290</TD>
+    <TD>http://solarmonitor.org/phiggins/smart_plots/smart_20100101_0139.png</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+  </TR>
+  <TR>
+    <TD>TCD</TD>
+    <TD>SMART</TD>
+    <TD>1.0</TD>
+    <TD>ACTIVE REGIONS</TD>
+    <TD>SUN</TD>
+    <TD>STAR</TD>
+    <TD>CHAINCODE</TD>
+    <TD>Paul Higgins</TD>
+    <TD>pohuigin@gmail.com</TD>
+    <TD>DOI: 10.1016/j.asr.2010.06.024</TD>
+    <TD>SOHO</TD>
+    <TD>MDI</TD>
+    <TD>MAGNETOGRAM</TD>
+    <TD>SOHO__MDI</TD>
+    <TD>Gauss</TD>
+    <TD>676.8</TD>
+    <TD>676.8</TD>
+    <TD>Ni I</TD>
+    <TD>NM</TD>
+    <TD>LINE_OF_SIGHT MAGNETIC FIELD</TD>
+    <TD>REMOTE-SENSING</TD>
+    <TD>SPACEBORNE</TD>
+    <TD>2010-01-01T03:11:02</TD>
+    <TD>2010-01-01T03:11:02</TD>
+    <TD>2455197</TD>
+    <TD>0.632662</TD>
+    <TD>2092</TD>
+    <TD>fd_M_96m_01d.6209.0002.fits</TD>
+    <TD></TD>
+    <TD>1.98561</TD>
+    <TD>1.98561</TD>
+    <TD>1024</TD>
+    <TD>1024</TD>
+    <TD>512.742</TD>
+    <TD>511.612</TD>
+    <TD>496.578</TD>
+    <TD>-32</TD>
+    <TD>1.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>FITS</TD>
+    <TD></TD>
+    <TD>-2147483648</TD>
+    <TD>IMAGE</TD>
+    <TD>ftp://ftpbass2000.obspm.fr/temp/qlk/soho/mdi/2010</TD>
+    <TD>fd_M_96m_01d.6209.0002.png</TD>
+    <TD>570072</TD>
+    <TD>11039</TD>
+    <TD>690</TD>
+    <TD>295</TD>
+    <TD>352.608</TD>
+    <TD>-428.345</TD>
+    <TD>24.3485</TD>
+    <TD>-28.7941</TD>
+    <TD>55.4881</TD>
+    <TD>-28.7941</TD>
+    <TD>632</TD>
+    <TD>259</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>747</TD>
+    <TD>330</TD>
+    <TD>238.0</TD>
+    <TD>-502.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>0.0</TD>
+    <TD>466.0</TD>
+    <TD>-361.0</TD>
+    <TD>18.2201</TD>
+    <TD>-36.9087</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>33.1871</TD>
+    <TD>-28.7624</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>5982</TD>
+    <TD>83.748</TD>
+    <TD></TD>
+    <TD>2486.81</TD>
+    <TD>-1982.62</TD>
+    <TD>-6.46271</TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD>78.989</TD>
+    <TD>75.3939</TD>
+    <TD>173.841</TD>
+    <TD>22.64</TD>
+    <TD>4.24499</TD>
+    <TD>643</TD>
+    <TD>257</TD>
+    <TD>259.903991699219</TD>
+    <TD>-505.920013427734</TD>
+    <TD>44444454445454555554444454445444444454445554443434443444444454445455454544333343444344444544455555555565656666666666666676767777707777666666676667676770707000000000700000000000007000000000001010111110000000000100100101011101010110101111111122212222222222222211111121222122222322232333434443</TD>
+    <TD>290</TD>
+    <TD>http://solarmonitor.org/phiggins/smart_plots/smart_20100101_0311.png</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+    <TD>-2147483648</TD>
+  </TR>
+</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>

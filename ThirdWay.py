@@ -10,6 +10,8 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import math
 from descartes import PolygonPatch
+from PIL import Image
+import cv2
 
 
 # Function takes array with chain codes, encode the chain code,
@@ -35,7 +37,6 @@ def encode_and_split(chain_codes):
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename):
     print("get_shapes() START")
-    contour = []  # Stores contour
     all_contours = []
 
     counter = 0
@@ -70,14 +71,16 @@ def get_shapes(chains, startx, starty, filename):
 
             carr = convert_to_carrington(xpos, ypos, filename)
             if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
-                contour.append([carr.lon.deg, carr.lat.deg])  # Add position of the pixel to array
-                lon.append(carr.lon.deg)
+                lon.append(carr.lon.deg)  # Add calculated position to array
                 lat.append(carr.lat.deg)
             else:
-                print("Problem with converting one pixel. It will be ignored.")
+                print("Problem with converting pixel. It will be ignored.")
 
-        all_contours.append((lon, lat))
-        np_all_contours = np.array(all_contours)
+        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
+
+        if not broken:
+            all_contours.append((lon, lat))
+
         counter += 1
 
     return all_contours
@@ -94,6 +97,43 @@ def convert_to_carrington(lon, lat, filename):
     carr = cords.transform_to(frames.HeliographicCarrington)
 
     return carr
+
+
+def make_synthesis(coordinates, track_id_list):
+    return
+
+
+def get_contour_pixels_indexes(contour, image_shape):
+    print("get_contour_pixels_indexes() START ")
+    im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of image size
+    cv_image = np.array(im)  # convert PIL image to opencv image
+    cv2.fillPoly(cv_image, pts=[contour], color=(255, 255, 255))  # draw active region
+    indexes = np.where(cv_image == 255)  # get all indexes of active region pixels
+
+    return indexes
+
+
+def calculate_ar_intensity(coord):
+    print("calculate_ar_intensity() START ")
+    pixels_number = len(coord[0])
+    sum = 0
+
+    for x in range(0, pixels_number):
+        sum += map.data[coord[0][x]][coord[1][x]]
+
+    return sum
+
+
+def calculate_average_ar_intensity(ar_intensities):
+    print("calculate_average_ar_intensity() START ")
+    sum = 0
+
+    for x in ar_intensities:
+        sum += x
+
+    average = sum / len(ar_intensities)
+    return average
+
 
 # coordinates - array with numpy arrays with coordinates of the contour of the object
 # Function creates polygon by using array with coordinates of the contour of the object

@@ -22,12 +22,12 @@ import math
 # using chain code. Then fill the hole of contour.
 # directions - array with chain code
 def chain_code(directions, xposs, yposs):
-    im = Image.new('RGB', (2048, 2048), (255, 255, 255)) # Create new, empty, white image
 
-    xpos = xposs  # Starting position of contour
+    xpos = xposs # Starting position of contour
     ypos = yposs
-
+    map = sunpy.map.Map("aia1.fits")
     contour = []  # Stores contour
+
 
     # 0 right
     # 1 down-right
@@ -43,91 +43,60 @@ def chain_code(directions, xposs, yposs):
         elif d == 1:
             xpos -= 1
             ypos -= 1
-
         elif d == 2:
             ypos -= 1
-
         elif d == 3:
             ypos -= 1
             xpos += 1
-
         elif d == 4:
             xpos += 1
-
         elif d == 5:
             ypos += 1
             xpos += 1
-
         elif d == 6:
             ypos += 1
-
         elif d == 7:
             ypos += 1
             xpos -= 1
 
-        #im.putpixel((xpos, ypos), (122, 122, 122))  # Draw pixel
+        world = map.pixel_to_world(xpos * u.pix, ypos * u.pix)
         contour.append([xpos, ypos])  # Add position of the pixel to array
 
 
-    np_contour = np.array(contour)  # Convert list to numpy array
-    cv_image = np.array(im)  # convert PIL image to opencv image
-    cv2.fillPoly(cv_image, pts=[np_contour], color=(0, 0, 0))
-
-    # cv2.imshow('image', cv_image)
-    # cv2.waitKey(0)
 
     np_contour = np.array(contour)  # Convert list to numpy array
     rows = np_contour.shape[0]
     cols = np_contour.shape[1]
-
-    map = sunpy.map.Map("aia1.fits")
-
+    #
     lon = []
     lat = []
-    cords = []
-    for x in range(0, rows):
-        arcx, arcy = map.pixel_to_data(np_contour[x][0] * u.pix, np_contour[x][1] * u.pix)
-        cord = SkyCoord(arcx, arcy, frame=map.coordinate_frame)
-        #cordss = map.pixel_to_world(np_contour[x][0] * u.pix, np_contour[x][1] * u.pix)
-        carr = cord.transform_to(frames.HeliographicCarrington)
 
 
-        if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
-            contour.append([carr.lon.deg, carr.lat.deg])  # Add position of the pixel to array
-            lon.append(carr.lon.deg)
-            lat.append(carr.lat.deg)
-        else:
-            print("problem")
+    for x in contour:
+        lon.append(x[0])
+        lat.append(x[1])
 
-        cords.append([carr.lon.deg, carr.lat.deg])
 
-    np_carrington = np.array(cords)
-    #print(lon)
+    im = Image.new('RGB', (4096, 4096), (0, 0, 0))
 
-    # w = wcs.WCS('2.fits')
-    hdulist = fits.open('eit1.fits')
+    data = map.data
+    print(map.data.shape)
 
-    # fig, ax = plt.subplots()
-    # fig = plt.figure(1, figsize=(90, 360), dpi=90)
-    # polygon = Polygon(np_carrington, True)
-    # patches = []
-    # patches.append(polygon)
-    # p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
-    #
-    # colors = 100 * np.random.rand(len(patches))
-    # p.set_array(np.array(colors))
-    #
-    # #fig = plt.figure(1, figsize=(90, 360), dpi=90)
-    #
-    # ax.add_collection(p)
-    fig = plt.figure(1, figsize=(10, 5), dpi=90)
-    ax = fig.add_subplot(111)
-    ax.autoscale_view()
+    cv_image = np.array(im)  # convert PIL image to opencv image
+    cv2.fillPoly(cv_image, pts=[np_contour], color=(255, 255, 255))
 
-    plt.scatter(lon, lat)
+    pts = np.where(cv_image == 255)
+
+    fig = plt.figure()
+    ax = plt.subplot(projection=map)
+    points = ax.scatter(pts[1], pts[0])
+    artist = map.plot(axes=ax)
+
+
     plt.show()
 
-    plt.show()
+
+
 
 def encode_and_split(chain_codes):
     print("encode_and_split() START")
@@ -152,5 +121,4 @@ if __name__ == '__main__':
     data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
-    print(chain_encoded)
     chain_code(chain_encoded[0], data.get_pixel_start_x()[0], data.get_pixel_start_y()[0])

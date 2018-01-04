@@ -37,7 +37,8 @@ def encode_and_split(chain_codes):
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename):
     print("get_shapes() START")
-    all_contours = []
+    all_contours_carr = []
+    all_contours_pix = []
 
     counter = 0
     # Loop goes through array of chain code
@@ -47,6 +48,8 @@ def get_shapes(chains, startx, starty, filename):
         ypos = starty[counter]
         lon = []
         lat = []
+        x = []
+        y = []
         for d in c:
             if d == 0:
                 xpos -= 1
@@ -69,6 +72,9 @@ def get_shapes(chains, startx, starty, filename):
                 ypos += 1
                 xpos -= 1
 
+            x.append(xpos)
+            y.append(ypos)
+
             carr = convert_to_carrington(xpos, ypos, filename)
             if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
                 lon.append(carr.lon.deg)  # Add calculated position to array
@@ -76,14 +82,16 @@ def get_shapes(chains, startx, starty, filename):
             else:
                 print("Problem with converting pixel. It will be ignored.")
 
+        all_contours_pix.append([x, y])
+
         broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
 
         if not broken:
-            all_contours.append((lon, lat))
+            all_contours_carr.append((lon, lat))
 
         counter += 1
 
-    return all_contours
+    return all_contours_carr, all_contours_pix
 
 
 # Function converts from pixel coordinates to carrington
@@ -99,8 +107,19 @@ def convert_to_carrington(lon, lat, filename):
     return carr
 
 
-def make_synthesis(coordinates, track_id_list):
-    return
+def merge_id_with_ar(coords, track_id):
+    ar_with_id = {}
+    ar_with_id[track_id[0]] = [coords[0]]
+
+    if len(coords) == len(track_id):
+        for x in range(1, len(track_id)):
+            if track_id[x] in ar_with_id:
+                ar_with_id[track_id[x]].append(coords[x])
+            else:
+                ar_with_id[track_id[x]] = [coords[x]]
+
+    return ar_with_id
+
 
 
 def get_contour_pixels_indexes(contour, image_shape):
@@ -113,15 +132,28 @@ def get_contour_pixels_indexes(contour, image_shape):
     return indexes
 
 
-def calculate_ar_intensity(coord):
+def calculate_ar_intensity(coord, filename):
     print("calculate_ar_intensity() START ")
-    pixels_number = len(coord[0])
-    sum = 0
+    pixels_number = len(coord)
+    intensity = 0.0
+    map = sunpy.map.Map(filename)
 
     for x in range(0, pixels_number):
-        sum += map.data[coord[0][x]][coord[1][x]]
+        intensity = intensity + map.data[coord[0][x]][coord[1][x]]
 
-    return sum
+    return intensity
+
+
+def make_synthesis(ar_with_id):
+    average = {}
+    for id, coords in ar_with_id.items():
+        regions = []
+        for y in coords:
+            regions.append(calculate_ar_intensity(y, 'aia1.fits'))
+
+        average[id] = calculate_average_ar_intensity(regions)
+
+    return average
 
 
 def calculate_average_ar_intensity(ar_intensities):
@@ -173,13 +205,20 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
     cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits")
 
-    display_object(cords2)
+    test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
+    nid = np.array(data.get_track_id())
+
+    ar_id = merge_id_with_ar(cords2[1], data.get_track_id())
+
+    print(make_synthesis(ar_id))
+
+   # display_object(cords2[0])
 
 
 

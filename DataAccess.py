@@ -14,7 +14,7 @@ import cv2
 class DataAccess:
     def __init__(self, start_date, end_date):
         url = 'http://voparis-helio.obspm.fr/helio-hfc/HelioQueryService?FROM=VIEW_AR_HQI&STARTTIME=' + start_date + \
-              '&ENDTIME=' + end_date + '&WHERE=OBSERVAT,SOHO;INSTRUME,MDI'
+              '&ENDTIME=' + end_date + '&WHERE=OBSERVAT,SDO;INSTRUME,AIA'
         # make url request
         f = urllib.request.urlopen(url)
         # decode
@@ -60,11 +60,27 @@ class DataAccess:
         chain_start_y = self.table.array['CC_Y_PIX']
         return chain_start_y
 
+    def get_track_id(self):
+        print("get_track_id START")
+        id = self.table.array['TRACK_ID']
+        return id
+
+    def get_noaa_number(self):
+        print("get_noaa_number START")
+        noaa = self.table.array['NOAA_NUMBER']
+        return noaa
+
+    def get_filename(self):
+        print("get_filename START")
+        filename = self.table.array['FILENAME']
+        return filename
+
 
 if __name__ == '__main__':
-    data = DataAccess('2010-01-01T00:03:02', '2010-01-01T04:03:02')
-    print(data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_chain_code())
-    print(data.get_carr_central_grav_lat(), data.get_carr_central_grav_long())
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
+    print(data.get_filename())
+    #print(data.get_noaa_number())
+
 
 
 

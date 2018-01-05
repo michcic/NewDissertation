@@ -29,6 +29,19 @@ def encode_and_split(chain_codes):
 
     return codes
 
+
+def encode_filename(filenames):
+    files = []
+
+    for f in filenames:
+        if type(f) is bytes:
+            f = f.decode("utf-8")
+
+        f = f.replace(":", "_")
+        files.append(f)
+
+    return files
+
 # Go through array with chain code, convert to carrington, draw contour of shape
 # using chain code.
 # chains - 2D array with chain codes
@@ -48,8 +61,7 @@ def get_shapes(chains, startx, starty, filename):
         ypos = starty[counter]
         lon = []
         lat = []
-        x = []
-        y = []
+        ar = []
         for d in c:
             if d == 0:
                 xpos -= 1
@@ -72,8 +84,7 @@ def get_shapes(chains, startx, starty, filename):
                 ypos += 1
                 xpos -= 1
 
-            x.append(xpos)
-            y.append(ypos)
+            ar.append([xpos, ypos])
 
             carr = convert_to_carrington(xpos, ypos, filename)
             if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
@@ -82,12 +93,14 @@ def get_shapes(chains, startx, starty, filename):
             else:
                 print("Problem with converting pixel. It will be ignored.")
 
-        all_contours_pix.append([x, y])
 
         broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
 
+        all_contours_pix.append(ar)
+
         if not broken:
             all_contours_carr.append((lon, lat))
+
 
         counter += 1
 
@@ -107,16 +120,22 @@ def convert_to_carrington(lon, lat, filename):
     return carr
 
 
-def merge_id_with_ar(coords, track_id):
+def merge_id_with_ar(coords, track_id, filename):
+    print("merge_id_with_ar START")
+    filename = encode_filename(filename)
     ar_with_id = {}
-    ar_with_id[track_id[0]] = [coords[0]]
+    ar_with_id[track_id[0]] = [(filename[0], coords[0])]
 
     if len(coords) == len(track_id):
         for x in range(1, len(track_id)):
             if track_id[x] in ar_with_id:
-                ar_with_id[track_id[x]].append(coords[x])
+                ar_with_id[track_id[x]].append((filename[x], coords[x]))
+                print("appending")
+                print(track_id[x], [track_id[x]])
             else:
-                ar_with_id[track_id[x]] = [coords[x]]
+                ar_with_id[track_id[x]] = [(filename[x], coords[x])]
+                print("creating")
+                print(track_id[x], ar_with_id[track_id[x]])
 
     return ar_with_id
 
@@ -124,6 +143,7 @@ def merge_id_with_ar(coords, track_id):
 
 def get_contour_pixels_indexes(contour, image_shape):
     print("get_contour_pixels_indexes() START ")
+    contour = np.array(contour)
     im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of image size
     cv_image = np.array(im)  # convert PIL image to opencv image
     cv2.fillPoly(cv_image, pts=[contour], color=(255, 255, 255))  # draw active region
@@ -134,6 +154,7 @@ def get_contour_pixels_indexes(contour, image_shape):
 
 def calculate_ar_intensity(coord, filename):
     print("calculate_ar_intensity() START ")
+    coord = get_contour_pixels_indexes(coord, filename)
     pixels_number = len(coord)
     intensity = 0.0
     map = sunpy.map.Map(filename)
@@ -149,7 +170,7 @@ def make_synthesis(ar_with_id):
     for id, coords in ar_with_id.items():
         regions = []
         for y in coords:
-            regions.append(calculate_ar_intensity(y, 'aia1.fits'))
+            regions.append(calculate_ar_intensity(y[1], y[0]))
 
         average[id] = calculate_average_ar_intensity(regions)
 
@@ -205,20 +226,16 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T03:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
     cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits")
-
     test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
     nid = np.array(data.get_track_id())
 
-    ar_id = merge_id_with_ar(cords2[1], data.get_track_id())
+    ar_id = merge_id_with_ar(cords2[1], data.get_track_id(), data.get_filename())
 
     print(make_synthesis(ar_id))
 
    # display_object(cords2[0])
-
-
-

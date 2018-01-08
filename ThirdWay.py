@@ -106,6 +106,12 @@ def get_shapes(chains, startx, starty, filename):
     return all_contours_carr, all_contours_pix
 
 
+# Go through array with chain code and calculate pixel coordinates
+# using chain code.
+# chains - 2D array with chain codes
+# startx - x coordinate of chain code start position in pixels
+# starty - y coordinate of chain code start position in pixels
+# return - array with coordinates of the contour of the object
 def get_shapes2(chains, startx, starty):
     all_contours_pix = []
 
@@ -182,11 +188,11 @@ def merge_id_with_ar(coords, track_id, filename):
     return ar_with_id
 
 
-
+# Finds pixel coordinates of pixels inside the ar contour
 def get_contour_pixels_indexes(contour, image_shape):
     print("get_contour_pixels_indexes() START ")
     contour = np.array(contour)
-    im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of image size
+    im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of FITS image size
     cv_image = np.array(im)  # convert PIL image to opencv image
     cv2.fillPoly(cv_image, pts=[contour], color=(255, 255, 255))  # draw active region
     indexes = np.where(cv_image == 255)  # get all indexes of active region pixels
@@ -194,43 +200,50 @@ def get_contour_pixels_indexes(contour, image_shape):
     return indexes
 
 
+# coord - coordinates of contour of ar
+# filename - FITS file associated with that ar
 def calculate_ar_intensity(coord, filename):
     print("calculate_ar_intensity() START ")
-    coord = get_contour_pixels_indexes(coord, filename)
+    coord = get_contour_pixels_indexes(coord, filename)  # find all pixels inside the contour
     pixels_number = len(coord)
     intensity = 0.0
     map = sunpy.map.Map(filename)
-
+    # calculate intensity
     for x in range(0, pixels_number):
         intensity = intensity + map.data[coord[0][x]][coord[1][x]]
 
     return intensity
 
 
+# Function takes dictionary with AR coords and their track_id
+# Goes through dictionary, calculates the intensity of each AR
+# makes synthesis by calculating the average of the same AR and by
+# choosing the closest AR to the average
 def make_synthesis(ar_with_id):
-    synthesis = {}
     all_contours_carr = []
     for id, coords in ar_with_id.items():
-        regions = []
-        ar_intensity_with_cords = {}
+        regions = []  # contain the intensity values of AR with track_id=id
+        ar_intensity_with_cords = {} # key = ar_intensity, value = coords
         for y in coords:
             ar_intensity = calculate_ar_intensity(y[1], y[0])
             regions.append(ar_intensity)
             ar_intensity_with_cords[ar_intensity] = y[1]
 
-
-
         print("regions = ", regions)
-        average = calculate_average_ar_intensity(regions)
+        average = calculate_average_ar_intensity(regions) # calculate the average intenisty value
         print("average = ", average)
+        # from all intensities from track_id = id, choose value which is the closest
+        # to the average value
         closest_to_average = min(regions, key=lambda x: abs(x - average))
         print("closest", closest_to_average)
         # synthesis[id] = intensity_cords[closest_to_average]
         synthesis = ar_intensity_with_cords[closest_to_average]
+
         lon = []
         lat = []
+        # convert choosen ar from pixel coordinates to carrington
         for ar in synthesis:
-            carr = convert_to_carrington(ar[0], ar[1], "aia1.fits")
+            carr = convert_to_carrington(ar[0], ar[1], "aia.lev1.171A_2011-07-30T00_00_24.34Z.image_lev1.fits")
             if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
                 lon.append(carr.lon.deg)  # Add calculated position to array
                 lat.append(carr.lat.deg)
@@ -245,13 +258,15 @@ def make_synthesis(ar_with_id):
     return all_contours_carr
 
 
+# ar_intensities - array with ar intensities
 def calculate_average_ar_intensity(ar_intensities):
     print("calculate_average_ar_intensity() START ")
     sum = 0
+    # go through array of pixel values and add them
     for x in ar_intensities:
         sum += x
 
-    average = sum / len(ar_intensities)
+    average = sum / len(ar_intensities) # calculate average
     return average
 
 
@@ -261,7 +276,7 @@ def calculate_average_ar_intensity(ar_intensities):
 # Function creates polygon by using array with coordinates of the contour of the object
 def display_object(coordinates):
     print("display_object() START ")
-    #print(coordinates)
+    print("coordinates", coordinates)
     # fig = plt.figure(1, figsize=(10, 5), dpi=90)
     # ax = fig.add_subplot(111)
     fig, ax = plt.subplots(1, figsize=(10, 5))
@@ -295,7 +310,7 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-31T00:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 

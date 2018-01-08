@@ -101,11 +101,50 @@ def get_shapes(chains, startx, starty, filename):
         if not broken:
             all_contours_carr.append((lon, lat))
 
-
         counter += 1
 
     return all_contours_carr, all_contours_pix
 
+
+def get_shapes2(chains, startx, starty):
+    all_contours_pix = []
+
+    counter = 0
+    # Loop goes through array of chain code
+    # and calculates coordinate of each of the pixel of the contour
+    for c in chains:
+        xpos = startx[counter]  # Starting position of contour
+        ypos = starty[counter]
+        ar = []
+        for d in c:
+            if d == 0:
+                xpos -= 1
+            elif d == 1:
+                xpos -= 1
+                ypos -= 1
+            elif d == 2:
+                ypos -= 1
+            elif d == 3:
+                ypos -= 1
+                xpos += 1
+            elif d == 4:
+                xpos += 1
+            elif d == 5:
+                ypos += 1
+                xpos += 1
+            elif d == 6:
+                ypos += 1
+            elif d == 7:
+                ypos += 1
+                xpos -= 1
+
+            ar.append([xpos, ypos])
+
+        all_contours_pix.append(ar)
+
+        counter += 1
+
+    return all_contours_pix
 
 # Function converts from pixel coordinates to carrington
 def convert_to_carrington(lon, lat, filename):
@@ -166,21 +205,25 @@ def calculate_ar_intensity(coord, filename):
 
 
 def make_synthesis(ar_with_id):
-    average = {}
+    synthesis = {}
     for id, coords in ar_with_id.items():
         regions = []
         for y in coords:
             regions.append(calculate_ar_intensity(y[1], y[0]))
 
-        average[id] = calculate_average_ar_intensity(regions)
+        print("regions = ", regions)
+        average = calculate_average_ar_intensity(regions)
+        print("average = ", average)
+        closest_to_average = min(regions, key=lambda x: abs(x - average))
+        print("closest", closest_to_average)
+        synthesis[id] = average
 
-    return average
+    return synthesis
 
 
 def calculate_average_ar_intensity(ar_intensities):
     print("calculate_average_ar_intensity() START ")
     sum = 0
-
     for x in ar_intensities:
         sum += x
 
@@ -226,15 +269,15 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T03:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
-    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits")
-    test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
-    nid = np.array(data.get_track_id())
+    cords2 = get_shapes2(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y())
+    # test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
+    # nid = np.array(data.get_track_id())
 
-    ar_id = merge_id_with_ar(cords2[1], data.get_track_id(), data.get_filename())
+    ar_id = merge_id_with_ar(cords2, data.get_track_id(), data.get_filename())
 
     print(make_synthesis(ar_id))
 

@@ -146,6 +146,8 @@ def get_shapes2(chains, startx, starty):
 
     return all_contours_pix
 
+
+
 # Function converts from pixel coordinates to carrington
 def convert_to_carrington(lon, lat, filename):
     #print("convert_to_carrington() START ")
@@ -158,7 +160,8 @@ def convert_to_carrington(lon, lat, filename):
 
     return carr
 
-
+# Creates dictionary where key is track_id of active region
+# and values are pixel coordinates of active region
 def merge_id_with_ar(coords, track_id, filename):
     print("merge_id_with_ar START")
     filename = encode_filename(filename)
@@ -206,19 +209,40 @@ def calculate_ar_intensity(coord, filename):
 
 def make_synthesis(ar_with_id):
     synthesis = {}
+    all_contours_carr = []
     for id, coords in ar_with_id.items():
         regions = []
+        ar_intensity_with_cords = {}
         for y in coords:
-            regions.append(calculate_ar_intensity(y[1], y[0]))
+            ar_intensity = calculate_ar_intensity(y[1], y[0])
+            regions.append(ar_intensity)
+            ar_intensity_with_cords[ar_intensity] = y[1]
+
+
 
         print("regions = ", regions)
         average = calculate_average_ar_intensity(regions)
         print("average = ", average)
         closest_to_average = min(regions, key=lambda x: abs(x - average))
         print("closest", closest_to_average)
-        synthesis[id] = average
+        # synthesis[id] = intensity_cords[closest_to_average]
+        synthesis = ar_intensity_with_cords[closest_to_average]
+        lon = []
+        lat = []
+        for ar in synthesis:
+            carr = convert_to_carrington(ar[0], ar[1], "aia1.fits")
+            if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
+                lon.append(carr.lon.deg)  # Add calculated position to array
+                lat.append(carr.lat.deg)
+            else:
+                print("Problem with converting pixel. It will be ignored.")
 
-    return synthesis
+        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
+
+        if not broken:
+            all_contours_carr.append((lon, lat))
+
+    return all_contours_carr
 
 
 def calculate_average_ar_intensity(ar_intensities):
@@ -229,6 +253,8 @@ def calculate_average_ar_intensity(ar_intensities):
 
     average = sum / len(ar_intensities)
     return average
+
+
 
 
 # coordinates - array with numpy arrays with coordinates of the contour of the object
@@ -269,7 +295,7 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-31T00:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
@@ -279,6 +305,6 @@ if __name__ == '__main__':
 
     ar_id = merge_id_with_ar(cords2, data.get_track_id(), data.get_filename())
 
-    print(make_synthesis(ar_id))
+    syn = make_synthesis(ar_id)
 
-   # display_object(cords2[0])
+    display_object(syn)

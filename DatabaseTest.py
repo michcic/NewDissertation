@@ -115,13 +115,16 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         ar_inten = calculate_ar_intensity(ar, filename)
 
         all_contours_pix.append(ar)
-        add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
+        a = add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
         if not broken:
-            all_contours_carr.append((lon, lat))
+            all_contours_carr.append(a)
 
         counter += 1
 
-    return all_contours_carr, all_contours_pix
+    mer = merge_id_with_ar(a[2], a[0], a[1])
+    syn = make_synthesis(mer)
+
+    return syn, all_contours_pix
 
 
 def add_to_database(ar_id, date, track_id, ar_intensity, coords):
@@ -140,14 +143,15 @@ def add_to_database(ar_id, date, track_id, ar_intensity, coords):
     js = json.dumps(coords)
     curs.execute('''INSERT INTO ar_test2(ar_id, date, track_id,
      ar_intensity, coordinates) VALUES(?,?,?,?,?)''', (ar_id, date, track_id, ar_intensity, js, ))
-    c = curs.execute("SELECT * FROM ar_test2").fetchall()
+    c = curs.execute("SELECT track_id, ar_intensity, coordinates FROM ar_test2").fetchall()
     # conn.commit()
     # conn.close()
-    kurwa = c[0][1]
-    print(kurwa)
-    # le = json.loads(kurwa)
-    #
-    # return le
+
+    track_id = c[0][0]
+    ar_intensity = c[0][1]
+    decoded_coords = json.loads(c[0][2])
+
+    return track_id, ar_intensity, decoded_coords
 
 
 # Function converts from pixel coordinates to carrington
@@ -164,20 +168,19 @@ def convert_to_carrington(lon, lat, filename):
 
 # Creates dictionary where key is track_id of active region
 # and values are pixel coordinates of active region
-def merge_id_with_ar(coords, track_id, filename):
+def merge_id_with_ar(coords, track_id, ar_intensity):
     print("merge_id_with_ar START")
-    filename = encode_filename(filename)
     ar_with_id = {}
-    ar_with_id[track_id[0]] = [(filename[0], coords[0])]
+    ar_with_id[track_id[0]] = [(ar_intensity[0], coords[0])]
 
     if len(coords) == len(track_id):
         for x in range(1, len(track_id)):
             if track_id[x] in ar_with_id:
-                ar_with_id[track_id[x]].append((filename[x], coords[x]))
+                ar_with_id[track_id[x]].append((ar_intensity[x], coords[x]))
                 print("appending")
                 print(track_id[x], [track_id[x]])
             else:
-                ar_with_id[track_id[x]] = [(filename[x], coords[x])]
+                ar_with_id[track_id[x]] = [(ar_intensity[x], coords[x])]
                 print("creating")
                 print(track_id[x], ar_with_id[track_id[x]])
 
@@ -221,9 +224,8 @@ def make_synthesis(ar_with_id):
         regions = []  # contain the intensity values of AR with track_id=id
         ar_intensity_with_cords = {} # key = ar_intensity, value = coords
         for y in coords:
-            ar_intensity = calculate_ar_intensity(y[1], y[0])
-            regions.append(ar_intensity)
-            ar_intensity_with_cords[ar_intensity] = y[1]
+            regions.append(y[0])
+            ar_intensity_with_cords[y[0]] = y[1]
 
         print("id = ", id)
         print("regions = ", regions)
@@ -238,21 +240,7 @@ def make_synthesis(ar_with_id):
         # synthesis[id] = intensity_cords[closest_to_average]
         synthesis = ar_intensity_with_cords[maximum]
 
-        lon = []
-        lat = []
-        # convert choosen ar from pixel coordinates to carrington
-        for ar in synthesis:
-            carr = convert_to_carrington(ar[0], ar[1], "aia.lev1.171A_2011-07-30T00_00_24.34Z.image_lev1.fits")
-            if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
-                lon.append(carr.lon.deg)  # Add calculated position to array
-                lat.append(carr.lat.deg)
-            else:
-                print("Problem with converting pixel. It will be ignored.")
-
-        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
-
-        if not broken:
-            all_contours_carr.append((lon, lat))
+        all_contours_carr.append(synthesis)
 
     return all_contours_carr
 
@@ -310,7 +298,6 @@ if __name__ == '__main__':
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
-
     cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits", data.get_track_id(), data.get_ar_id(), data.get_date())
     # test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
     # nid = np.array(data.get_track_id())
@@ -321,4 +308,4 @@ if __name__ == '__main__':
 
     # a = add_to_database(cords2[0])
     #
-    # display_object(a)
+    display_object(cords2[0])

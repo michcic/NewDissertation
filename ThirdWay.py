@@ -12,6 +12,7 @@ import math
 from descartes import PolygonPatch
 from PIL import Image
 import cv2
+import json
 
 
 # Function takes array with chain codes, encode the chain code,
@@ -95,6 +96,7 @@ def get_shapes(chains, startx, starty, filename):
 
 
         broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
+
 
         all_contours_pix.append(ar)
 
@@ -229,15 +231,18 @@ def make_synthesis(ar_with_id):
             regions.append(ar_intensity)
             ar_intensity_with_cords[ar_intensity] = y[1]
 
+        print("id = ", id)
         print("regions = ", regions)
-        average = calculate_average_ar_intensity(regions) # calculate the average intenisty value
+        average = calculate_average_ar_intensity(regions)  # calculate the average intenisty value
         print("average = ", average)
         # from all intensities from track_id = id, choose value which is the closest
         # to the average value
         closest_to_average = min(regions, key=lambda x: abs(x - average))
+        maximum = max(regions)
         print("closest", closest_to_average)
+        print("max", maximum)
         # synthesis[id] = intensity_cords[closest_to_average]
-        synthesis = ar_intensity_with_cords[closest_to_average]
+        synthesis = ar_intensity_with_cords[maximum]
 
         lon = []
         lat = []
@@ -258,6 +263,25 @@ def make_synthesis(ar_with_id):
     return all_contours_carr
 
 
+def add_to_database(coords):
+    import sqlite3
+    conn = sqlite3.connect('ar_carrington.db')
+    curs = conn.cursor()
+    #curs.execute('''CREATE TABLE ar_test(coords)''')
+
+
+    js = json.dumps(coords)
+    curs.execute('''INSERT INTO ar_test VALUES(?)''', (js, ))
+    #js2 = curs.execute("SELECT * FROM ar_test").fetchall()
+    c = curs.execute("SELECT * FROM ar_test").fetchall()
+
+    kurwa = c[0][0]
+
+    le = json.loads(kurwa)
+
+    return le
+
+
 # ar_intensities - array with ar intensities
 def calculate_average_ar_intensity(ar_intensities):
     print("calculate_average_ar_intensity() START ")
@@ -270,13 +294,10 @@ def calculate_average_ar_intensity(ar_intensities):
     return average
 
 
-
-
 # coordinates - array with numpy arrays with coordinates of the contour of the object
 # Function creates polygon by using array with coordinates of the contour of the object
 def display_object(coordinates):
     print("display_object() START ")
-    print("coordinates", coordinates)
     # fig = plt.figure(1, figsize=(10, 5), dpi=90)
     # ax = fig.add_subplot(111)
     fig, ax = plt.subplots(1, figsize=(10, 5))
@@ -310,16 +331,18 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T04:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
-    cords2 = get_shapes2(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y())
+    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits")
     # test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
     # nid = np.array(data.get_track_id())
 
-    ar_id = merge_id_with_ar(cords2, data.get_track_id(), data.get_filename())
+    # ar_id = merge_id_with_ar(cords2, data.get_track_id(), data.get_filename())
+    #
+    # syn = make_synthesis(ar_id)
 
-    syn = make_synthesis(ar_id)
+    a = add_to_database(cords2[0])
 
-    display_object(syn)
+    display_object(a)

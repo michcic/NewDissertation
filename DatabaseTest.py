@@ -63,6 +63,7 @@ def encode_date(dates):
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
+    delete_from_database()  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     all_contours_carr = []
     all_contours_pix = []
     all_track = []
@@ -117,16 +118,16 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         ar_inten = calculate_ar_intensity(ar, file)
 
         all_contours_pix.append(ar)
-        a = add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
+        print("add to dabase", t_id)
+        add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
 
-        if not broken:
-            all_contours_carr.append(a[2])
-            all_track.append(a[0])
-            all_inten.append(a[1])
+
 
         counter += 1
 
-    mer = merge_id_with_ar(all_contours_carr, all_track, all_inten)
+    a = load_from_database(date)
+    print()
+    mer = merge_id_with_ar(a[2], a[0], a[1])
     syn = make_synthesis(mer)
 
 
@@ -143,7 +144,6 @@ def add_to_database(ar_id, date, track_id, ar_intensity, coords):
 
     # curs.execute('''CREATE TABLE ar_test3(ar_id PRIMARY KEY, date, track_id,
     #  ar_intensity, coordinates)''')
-    #curs.execute('''DELETE FROM ar_test''')
 
     js = json.dumps(coords)
     curs.execute('''INSERT INTO ar_test2(ar_id, date, track_id,
@@ -158,13 +158,32 @@ def load_from_database(dates):
     conn = sqlite3.connect('ar_carrington.db')
     curs = conn.cursor()
 
-    c = curs.execute("SELECT track_id, ar_intensity, coordinates FROM ar_test2").fetchall()
+    sql = 'SELECT track_id, ar_intensity, coordinates FROM ar_test2'
 
-    track_id = c[0][0]
-    ar_intensity = c[0][1]
-    decoded_coords = json.loads(c[0][2])
+    c = curs.execute(sql).fetchall()
+
+    track_id = []
+    ar_intensity = []
+    decoded_coords = []
+
+    for result in c:
+        track_id.append(result[0])
+        ar_intensity.append(result[1])
+        decoded_coords.append(json.loads(result[2]))
+
+    conn.close()
+    print("TRACK_ID", track_id)
 
     return track_id, ar_intensity, decoded_coords
+
+
+def delete_from_database():
+    conn = sqlite3.connect('ar_carrington.db')
+    curs = conn.cursor()
+    curs.execute('''DELETE FROM ar_test2''')
+    conn.commit()
+    conn.close()
+
 
 # Function converts from pixel coordinates to carrington
 def convert_to_carrington(lon, lat, filename):
@@ -182,6 +201,7 @@ def convert_to_carrington(lon, lat, filename):
 # and values are pixel coordinates of active region
 def merge_id_with_ar(coords, track_id, ar_intensity):
     print("merge_id_with_ar START")
+    print("track", track_id)
     ar_with_id = {}
     ar_with_id[track_id[0]] = [(ar_intensity[0], coords[0])]
 
@@ -277,8 +297,6 @@ def display_object(coordinates):
     # ax = fig.add_subplot(111)
     fig, ax = plt.subplots(1, figsize=(10, 5))
 
-    print(coordinates)
-
     latitude_start = -90
     latitude_end = 90
     longitude_start = 0
@@ -308,7 +326,7 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T05:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
@@ -322,4 +340,8 @@ if __name__ == '__main__':
 
     # a = add_to_database(cords2[0])
     #
+    # dat = encode_date(data.get_date())
+    # a = load_from_database(dat)
+    # mer = merge_id_with_ar([a[2]], [a[0]], [a[1]])
+    # syn = make_synthesis(mer)
     display_object(cords2[0])

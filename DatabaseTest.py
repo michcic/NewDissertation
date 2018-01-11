@@ -13,6 +13,7 @@ from descartes import PolygonPatch
 from PIL import Image
 import cv2
 import json
+import sqlite3
 
 
 # Function takes array with chain codes, encode the chain code,
@@ -64,7 +65,9 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
     all_contours_carr = []
     all_contours_pix = []
-    #filename = encode_filename(filename)
+    all_track = []
+    all_inten = []
+    filename = encode_filename(filename)
     date = encode_date(date)
     counter = 0
     # Loop goes through array of chain code
@@ -74,7 +77,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         ypos = starty[counter]
         t_id = track_id[counter]
         a_id = ar_id[counter]
-        #file = filename[counter]
+        file = filename[counter]
         ar_date = date[counter]
         lon = []
         lat = []
@@ -102,8 +105,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 xpos -= 1
 
             ar.append([xpos, ypos])
-
-            carr = convert_to_carrington(xpos, ypos, filename)
+            carr = convert_to_carrington(xpos, ypos, file)
             if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
                 lon.append(carr.lon.deg)  # Add calculated position to array
                 lat.append(carr.lat.deg)
@@ -112,23 +114,26 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 
 
         broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
-        ar_inten = calculate_ar_intensity(ar, filename)
+        ar_inten = calculate_ar_intensity(ar, file)
 
         all_contours_pix.append(ar)
         a = add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
+
         if not broken:
-            all_contours_carr.append(a)
+            all_contours_carr.append(a[2])
+            all_track.append(a[0])
+            all_inten.append(a[1])
 
         counter += 1
 
-    mer = merge_id_with_ar(a[2], a[0], a[1])
+    mer = merge_id_with_ar(all_contours_carr, all_track, all_inten)
     syn = make_synthesis(mer)
+
 
     return syn, all_contours_pix
 
 
 def add_to_database(ar_id, date, track_id, ar_intensity, coords):
-    import sqlite3
     conn = sqlite3.connect('ar_carrington.db')
     curs = conn.cursor()
 
@@ -143,16 +148,23 @@ def add_to_database(ar_id, date, track_id, ar_intensity, coords):
     js = json.dumps(coords)
     curs.execute('''INSERT INTO ar_test2(ar_id, date, track_id,
      ar_intensity, coordinates) VALUES(?,?,?,?,?)''', (ar_id, date, track_id, ar_intensity, js, ))
+
+    conn.commit()
+    conn.close()
+
+
+
+def load_from_database(dates):
+    conn = sqlite3.connect('ar_carrington.db')
+    curs = conn.cursor()
+
     c = curs.execute("SELECT track_id, ar_intensity, coordinates FROM ar_test2").fetchall()
-    # conn.commit()
-    # conn.close()
 
     track_id = c[0][0]
     ar_intensity = c[0][1]
     decoded_coords = json.loads(c[0][2])
 
     return track_id, ar_intensity, decoded_coords
-
 
 # Function converts from pixel coordinates to carrington
 def convert_to_carrington(lon, lat, filename):
@@ -265,6 +277,8 @@ def display_object(coordinates):
     # ax = fig.add_subplot(111)
     fig, ax = plt.subplots(1, figsize=(10, 5))
 
+    print(coordinates)
+
     latitude_start = -90
     latitude_end = 90
     longitude_start = 0
@@ -294,11 +308,11 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T05:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
-    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), "aia1.fits", data.get_track_id(), data.get_ar_id(), data.get_date())
+    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(), data.get_track_id(), data.get_ar_id(), data.get_date())
     # test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
     # nid = np.array(data.get_track_id())
 

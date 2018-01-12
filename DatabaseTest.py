@@ -14,6 +14,7 @@ from PIL import Image
 import cv2
 import json
 import sqlite3
+import Database as db
 
 
 # Function takes array with chain codes, encode the chain code,
@@ -63,13 +64,15 @@ def encode_date(dates):
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
-    delete_from_database()  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    db.delete_from_database() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     all_contours_carr = []
     all_contours_pix = []
-    all_track = []
-    all_inten = []
     filename = encode_filename(filename)
     date = encode_date(date)
+    print("date", date)
+    all_track = []
+    all_intensities = []
+    all_coords_carr = []
     counter = 0
     # Loop goes through array of chain code
     # and calculates coordinate of each of the pixel of the contour
@@ -83,106 +86,60 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         lon = []
         lat = []
         ar = []
-        for d in c:
-            if d == 0:
-                xpos -= 1
-            elif d == 1:
-                xpos -= 1
-                ypos -= 1
-            elif d == 2:
-                ypos -= 1
-            elif d == 3:
-                ypos -= 1
-                xpos += 1
-            elif d == 4:
-                xpos += 1
-            elif d == 5:
-                ypos += 1
-                xpos += 1
-            elif d == 6:
-                ypos += 1
-            elif d == 7:
-                ypos += 1
-                xpos -= 1
+        # Check if exists in database
+        result = db.load_from_database([ar_date])
+        if not result == ([], [], []):
+            print("RESULT NOT NULL")
+            all_track += result[0]
+            all_intensities += result[1]
+            all_coords_carr += result[2]
+        else:
+            print("RESULT NULL")
+            for d in c:
+                if d == 0:
+                    xpos -= 1
+                elif d == 1:
+                    xpos -= 1
+                    ypos -= 1
+                elif d == 2:
+                    ypos -= 1
+                elif d == 3:
+                    ypos -= 1
+                    xpos += 1
+                elif d == 4:
+                    xpos += 1
+                elif d == 5:
+                    ypos += 1
+                    xpos += 1
+                elif d == 6:
+                    ypos += 1
+                elif d == 7:
+                    ypos += 1
+                    xpos -= 1
 
-            ar.append([xpos, ypos])
-            carr = convert_to_carrington(xpos, ypos, file)
-            if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
-                lon.append(carr.lon.deg)  # Add calculated position to array
-                lat.append(carr.lat.deg)
-            else:
-                print("Problem with converting pixel. It will be ignored.")
+                ar.append([xpos, ypos])
+                carr = convert_to_carrington(xpos, ypos, file)
+                if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
+                    lon.append(carr.lon.deg)  # Add calculated position to array
+                    lat.append(carr.lat.deg)
+                else:
+                    print("Problem with converting pixel. It will be ignored.")
 
-
-        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
         ar_inten = calculate_ar_intensity(ar, file)
+        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
+        if not broken:
+            all_track.append(t_id)
+            all_intensities.append(ar_inten)
+            all_coords_carr.append([lon, lat])
 
-        all_contours_pix.append(ar)
-        print("add to dabase", t_id)
-        add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
-
-
+        db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
 
         counter += 1
 
-    a = load_from_database(date)
-    print()
-    mer = merge_id_with_ar(a[2], a[0], a[1])
+    mer = merge_id_with_ar(all_coords_carr, all_track, all_intensities)
     syn = make_synthesis(mer)
 
-
-    return syn, all_contours_pix
-
-
-def add_to_database(ar_id, date, track_id, ar_intensity, coords):
-    conn = sqlite3.connect('ar_carrington.db')
-    curs = conn.cursor()
-
-    ar_id = str(ar_id)
-    date = str(date)
-    track_id = str(track_id)
-
-    # curs.execute('''CREATE TABLE ar_test3(ar_id PRIMARY KEY, date, track_id,
-    #  ar_intensity, coordinates)''')
-
-    js = json.dumps(coords)
-    curs.execute('''INSERT INTO ar_test2(ar_id, date, track_id,
-     ar_intensity, coordinates) VALUES(?,?,?,?,?)''', (ar_id, date, track_id, ar_intensity, js, ))
-
-    conn.commit()
-    conn.close()
-
-
-
-def load_from_database(dates):
-    conn = sqlite3.connect('ar_carrington.db')
-    curs = conn.cursor()
-
-    sql = 'SELECT track_id, ar_intensity, coordinates FROM ar_test2'
-
-    c = curs.execute(sql).fetchall()
-
-    track_id = []
-    ar_intensity = []
-    decoded_coords = []
-
-    for result in c:
-        track_id.append(result[0])
-        ar_intensity.append(result[1])
-        decoded_coords.append(json.loads(result[2]))
-
-    conn.close()
-    print("TRACK_ID", track_id)
-
-    return track_id, ar_intensity, decoded_coords
-
-
-def delete_from_database():
-    conn = sqlite3.connect('ar_carrington.db')
-    curs = conn.cursor()
-    curs.execute('''DELETE FROM ar_test2''')
-    conn.commit()
-    conn.close()
+    return syn
 
 
 # Function converts from pixel coordinates to carrington
@@ -196,6 +153,7 @@ def convert_to_carrington(lon, lat, filename):
     carr = cords.transform_to(frames.HeliographicCarrington)
 
     return carr
+
 
 # Creates dictionary where key is track_id of active region
 # and values are pixel coordinates of active region
@@ -326,7 +284,7 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T00:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T05:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
@@ -341,7 +299,7 @@ if __name__ == '__main__':
     # a = add_to_database(cords2[0])
     #
     # dat = encode_date(data.get_date())
-    # a = load_from_database(dat)
-    # mer = merge_id_with_ar([a[2]], [a[0]], [a[1]])
+    # a = db.load_from_database(dat)
+    # mer = merge_id_with_ar(a[2], a[0], a[1])
     # syn = make_synthesis(mer)
     display_object(cords2[0])

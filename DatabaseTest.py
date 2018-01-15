@@ -74,7 +74,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     all_intensities = []
     all_coords_carr = []
     counter = 0
-    id_checker = -1
     # Loop goes through array of chain code
     # and calculates coordinate of each of the pixel of the contour
     for c in chains:
@@ -97,7 +96,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 all_track += result[0]
                 all_intensities += result[1]
                 all_coords_carr += result[2]
-
         else:
             print("RESULT NULL")
             for d in c:
@@ -138,12 +136,11 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 # print("T_ID", t_id)
                 # print("AR_INTEN", ar_inten)
                 # print("[lon, lat", [lon, lat])
-                all_track.append(t_id)
+                all_track.append(str(t_id))
                 all_intensities.append(ar_inten)
                 all_coords_carr.append([lon, lat])
 
         counter += 1
-
     mer = merge_id_with_ar(all_coords_carr, all_track, all_intensities)
     syn = make_synthesis(mer)
 
@@ -167,20 +164,17 @@ def convert_to_carrington(lon, lat, filename):
 # and values are pixel coordinates of active region
 def merge_id_with_ar(coords, track_id, ar_intensity):
     print("merge_id_with_ar START")
-    print("track", track_id)
     ar_with_id = {}
     ar_with_id[track_id[0]] = [(ar_intensity[0], coords[0])]
-
+    print("TRACK_ID INSIDE MERG", track_id)
     if len(coords) == len(track_id):
         for x in range(1, len(track_id)):
             if track_id[x] in ar_with_id:
                 ar_with_id[track_id[x]].append((ar_intensity[x], coords[x]))
                 print("appending")
-                print(track_id[x], [track_id[x]])
             else:
                 ar_with_id[track_id[x]] = [(ar_intensity[x], coords[x])]
                 print("creating")
-                print(track_id[x], ar_with_id[track_id[x]])
 
     return ar_with_id
 

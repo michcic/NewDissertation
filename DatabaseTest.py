@@ -64,7 +64,7 @@ def encode_date(dates):
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
-    db.delete_from_database() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+    #db.delete_from_database() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     all_contours_carr = []
     all_contours_pix = []
     filename = encode_filename(filename)
@@ -74,6 +74,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     all_intensities = []
     all_coords_carr = []
     counter = 0
+    id_checker = -1
     # Loop goes through array of chain code
     # and calculates coordinate of each of the pixel of the contour
     for c in chains:
@@ -81,18 +82,22 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         ypos = starty[counter]
         t_id = track_id[counter]
         a_id = ar_id[counter]
+        print("ID", a_id)
         file = filename[counter]
         ar_date = date[counter]
         lon = []
         lat = []
         ar = []
         # Check if exists in database
-        result = db.load_from_database([ar_date])
+        result = db.load_from_database(a_id)
         if not result == ([], [], []):
             print("RESULT NOT NULL")
-            all_track += result[0]
-            all_intensities += result[1]
-            all_coords_carr += result[2]
+            broken = max(result[2][0][0]) - min(result[2][0][0]) > 355
+            if not broken:
+                all_track += result[0]
+                all_intensities += result[1]
+                all_coords_carr += result[2]
+
         else:
             print("RESULT NULL")
             for d in c:
@@ -125,14 +130,17 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 else:
                     print("Problem with converting pixel. It will be ignored.")
 
-        ar_inten = calculate_ar_intensity(ar, file)
-        broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
-        if not broken:
-            all_track.append(t_id)
-            all_intensities.append(ar_inten)
-            all_coords_carr.append([lon, lat])
+            ar_inten = calculate_ar_intensity(ar, file)
+            db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat])
 
-        db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon,lat])
+            broken = max(lon) - min(lon) > 355  # check if object go through the end of map and finish at the beginning
+            if not broken:
+                # print("T_ID", t_id)
+                # print("AR_INTEN", ar_inten)
+                # print("[lon, lat", [lon, lat])
+                all_track.append(t_id)
+                all_intensities.append(ar_inten)
+                all_coords_carr.append([lon, lat])
 
         counter += 1
 
@@ -284,7 +292,7 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T05:00:24')
+    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T03:00:24')
 
     chain_encoded = encode_and_split(data.get_chain_code())
 
@@ -302,4 +310,4 @@ if __name__ == '__main__':
     # a = db.load_from_database(dat)
     # mer = merge_id_with_ar(a[2], a[0], a[1])
     # syn = make_synthesis(mer)
-    display_object(cords2[0])
+    display_object(cords2)

@@ -69,7 +69,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     all_contours_pix = []
     filename = encode_filename(filename)
     date = encode_date(date)
-    print("date", date)
+    print("chains length", date)
     all_track = []
     all_intensities = []
     all_coords_carr = []
@@ -91,7 +91,8 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         result = db.load_from_database(a_id)
         if not result == ([], [], []):
             print("RESULT NOT NULL")
-            broken = max(result[2][0][0]) - min(result[2][0][0]) > 355
+            broken = (max(result[2][0][0]) - min(result[2][0][0])) > 358
+            print("MAX - MIN", result[0][0])
             if not broken:
                 all_track += result[0]
                 all_intensities += result[1]
@@ -128,6 +129,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 else:
                     print("Problem with converting pixel. It will be ignored.")
 
+            all_contours_pix.append(ar)
             ar_inten = calculate_ar_intensity(ar, file)
             db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat])
 
@@ -144,7 +146,48 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     mer = merge_id_with_ar(all_coords_carr, all_track, all_intensities)
     syn = make_synthesis(mer)
 
-    return syn
+    return syn, all_contours_pix
+
+def get_shapes2(chains, startx, starty):
+    all_contours_pix = []
+
+    counter = 0
+    # Loop goes through array of chain code
+    # and calculates coordinate of each of the pixel of the contour
+    for c in chains:
+        xpos = startx[counter]  # Starting position of contour
+        ypos = starty[counter]
+        ar = []
+        for d in c:
+            if d == 0:
+                xpos -= 1
+            elif d == 1:
+                xpos -= 1
+                ypos -= 1
+            elif d == 2:
+                ypos -= 1
+            elif d == 3:
+                ypos -= 1
+                xpos += 1
+            elif d == 4:
+                xpos += 1
+            elif d == 5:
+                ypos += 1
+                xpos += 1
+            elif d == 6:
+                ypos += 1
+            elif d == 7:
+                ypos += 1
+                xpos -= 1
+
+            ar.append([xpos, ypos])
+
+
+        all_contours_pix.append(ar)
+
+        counter += 1
+
+    return all_contours_pix
 
 
 # Function converts from pixel coordinates to carrington
@@ -166,18 +209,26 @@ def merge_id_with_ar(coords, track_id, ar_intensity):
     print("merge_id_with_ar START")
     ar_with_id = {}
     ar_with_id[track_id[0]] = [(ar_intensity[0], coords[0])]
-    print("TRACK_ID INSIDE MERG", track_id)
+    #print("TRACK_ID INSIDE MERG", track_id)
     if len(coords) == len(track_id):
         for x in range(1, len(track_id)):
             if track_id[x] in ar_with_id:
                 ar_with_id[track_id[x]].append((ar_intensity[x], coords[x]))
-                print("appending")
+                #print("appending")
             else:
                 ar_with_id[track_id[x]] = [(ar_intensity[x], coords[x])]
-                print("creating")
-
+                #print("creating")
+    #print("AR with ID", ar_with_id.keys())
     return ar_with_id
 
+def make_sp_synthesis(ar_contour, sp_contour):
+
+    for ar in ar_contour:
+        ar = np.array(ar)
+        for sp in sp_contour:
+            for s in sp:
+                s = (s[0], s[1])
+                print(cv2.pointPolygonTest(ar, s, False))
 
 # Finds pixel coordinates of pixels inside the ar contour
 def get_contour_pixels_indexes(contour, image_shape):
@@ -219,16 +270,16 @@ def make_synthesis(ar_with_id):
             regions.append(y[0])
             ar_intensity_with_cords[y[0]] = y[1]
 
-        print("id = ", id)
-        print("regions = ", regions)
+        #print("id = ", id)
+        #print("regions = ", regions)
         average = calculate_average_ar_intensity(regions)  # calculate the average intenisty value
-        print("average = ", average)
+        #print("average = ", average)
         # from all intensities from track_id = id, choose value which is the closest
         # to the average value
         closest_to_average = min(regions, key=lambda x: abs(x - average))
         maximum = max(regions)
-        print("closest", closest_to_average)
-        print("max", maximum)
+        #print("closest", closest_to_average)
+       # print("max", maximum)
         # synthesis[id] = intensity_cords[closest_to_average]
         synthesis = ar_intensity_with_cords[maximum]
 
@@ -251,7 +302,7 @@ def calculate_average_ar_intensity(ar_intensities):
 
 # coordinates - array with numpy arrays with coordinates of the contour of the object
 # Function creates polygon by using array with coordinates of the contour of the object
-def display_object(coordinates):
+def display_object(ar_coordinates, sp_coordinates):
     print("display_object() START ")
     # fig = plt.figure(1, figsize=(10, 5), dpi=90)
     # ax = fig.add_subplot(111)
@@ -276,7 +327,11 @@ def display_object(coordinates):
     # push grid lines behind the elements
     ax.set_axisbelow(True)
 
-    for c in coordinates:
+    for c in ar_coordinates:
+        #plt.scatter(c[0], c[1], marker='o', s=1)
+        plt.fill(c[0], c[1])
+
+    for c in sp_coordinates:
         #plt.scatter(c[0], c[1], marker='o', s=1)
         plt.fill(c[0], c[1])
 
@@ -286,11 +341,24 @@ def display_object(coordinates):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2011-07-30T00:00:24', '2011-07-30T03:00:24')
+    data = DataAccess('2010-01-01T00:00:00', '2010-01-01T23:59:00', 'AR')
+    data2 = DataAccess('2010-01-01T00:00:00', '2010-01-01T23:59:00', 'SP')
 
     chain_encoded = encode_and_split(data.get_chain_code())
+    chain_encoded2 = encode_and_split(data2.get_chain_code())
 
-    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(), data.get_track_id(), data.get_ar_id(), data.get_date())
+
+    # cords3 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(),
+    #                     data.get_noaa_number(), data.get_ar_id(), data.get_date())
+    #
+    # cords2 = get_shapes(chain_encoded2, data2.get_pixel_start_x(), data2.get_pixel_start_y(), data2.get_filename(), data2.get_noaa_number(),
+    #                     data2.get_sp_id(), data2.get_date())
+
+    ar_coord = get_shapes2(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y())
+    sp_coord = get_shapes2(chain_encoded2, data2.get_pixel_start_x(), data2.get_pixel_start_y())
+
+    make_sp_synthesis(ar_coord, sp_coord)
+
     # test = [[123,3556,342,324,234], [144,4], [144,4], [144,4], [144,4], [144,4]]
     # nid = np.array(data.get_track_id())
 
@@ -304,4 +372,4 @@ if __name__ == '__main__':
     # a = db.load_from_database(dat)
     # mer = merge_id_with_ar(a[2], a[0], a[1])
     # syn = make_synthesis(mer)
-    display_object(cords2)
+    #display_object(cords3, cords2)

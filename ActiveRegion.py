@@ -16,14 +16,12 @@ import ObjectPreparation as prep
 # return - array with coordinates of the contour of the object
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
-    #db.delete_from_database() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-    all_contours_pix = []
     filename = prep.encode_filename(filename)
     date = prep.encode_date(date)
-    print("chains length", date)
     all_track = []
     all_intensities = []
     all_coords_carr = []
+    all_contours_pix = []
     counter = 0
     # Loop goes through array of chain code
     # and calculates coordinate of each of the pixel of the contour
@@ -36,23 +34,23 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         file = filename[counter]
         ar_date = date[counter]
 
-        #Calculate ar contour in pixel, carrington longitude and latitude
-        ar, lon, lat = prep.get_shape(coords=c, xpos=xpos, ypos=ypos, file=file)
-        all_contours_pix.append(ar)
-
         # Check if exists in database
         result = db.load_from_database(a_id)
-        if not result == ([], [], []):
+        if not result == ([], [], [], []):
             print("RESULT NOT NULL")
             # check if object go through the end of map and finish at the beginning
             broken = (max(result[2][0][0]) - min(result[2][0][0])) > 358
-            print("MAX - MIN", result[0][0])
             if not broken:
                 all_track += result[0]
                 all_intensities += result[1]
                 all_coords_carr += result[2]
+                all_contours_pix.append(result[3])
         else:
             print("RESULT NULL")
+            # Calculate ar contour in pixel, carrington longitude and latitude
+            ar, lon, lat = prep.get_shape(coords=c, xpos=xpos, ypos=ypos, file=file)
+            print(ar)
+            all_contours_pix.append(ar)
             ar_inten = calculate_ar_intensity(ar, file)
             db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat])
 
@@ -64,7 +62,8 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 
         counter += 1
 
-    mer = merge_id_with_ar(all_coords_carr, all_track, all_intensities, all_contours_pix)
+
+    mer = merge_id_with_ar(all_coords_carr, all_contours_pix, all_track, all_intensities)
     syn = make_synthesis(mer)
 
     return syn
@@ -73,16 +72,16 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 # Creates dictionary where key is track_id of active region
 # and values are tuple of ar's intensity, carrington coordinates and
 # pixel coordinates
-def merge_id_with_ar(carr_coords, track_id, ar_intensity, pixel_coords):
+def merge_id_with_ar(carr_coords, pix_coords,  track_id, ar_intensity):
     print("merge_id_with_ar START")
     ar_with_id = {}
-    ar_with_id[track_id[0]] = [(ar_intensity[0], carr_coords[0], pixel_coords[0])]
+    ar_with_id[track_id[0]] = [(ar_intensity[0], carr_coords[0], pix_coords[0])]
     if len(carr_coords) == len(track_id):
         for x in range(1, len(track_id)):
             if track_id[x] in ar_with_id:
-                ar_with_id[track_id[x]].append((ar_intensity[x], carr_coords[x], pixel_coords[x]))
+                ar_with_id[track_id[x]].append((ar_intensity[x], carr_coords[x], pix_coords[x]))
             else:
-                ar_with_id[track_id[x]] = [(ar_intensity[x], carr_coords[x], pixel_coords[x])]
+                ar_with_id[track_id[x]] = [(ar_intensity[x], carr_coords[x], pix_coords[x])]
 
     return ar_with_id
 
@@ -123,27 +122,27 @@ def calculate_ar_intensity(coord, filename):
 # makes synthesis by calculating the average of the same AR and by
 # choosing the closest AR to the average
 def make_synthesis(ar_with_id):
-    carrington_pixel_contours = []
+    all_contours_carr = []
+    all_contours_pix = []
     for id, coords in ar_with_id.items():
-        intensities = []  # contain the intensity values of AR with track_id=id
-        ar_intensity_with_cords = {}  # key = ar_intensity, value = (carr_coords, pix_coords)
+        regions = []  # contain the intensity values of AR with track_id=id
+        ar_intensity_with_cords = {} # key = ar_intensity, value = (carrington_coord, pixel_coord)
         for y in coords:
-            intensities.append(y[0])
+            regions.append(y[0])
             ar_intensity_with_cords[y[0]] = (y[1], y[2])
 
-        average = calculate_average_ar_intensity(intensities)  # calculate the average intenisty value
+        average = calculate_average_ar_intensity(regions)  # calculate the average intenisty value
 
         # from all intensities from track_id = id, choose value which is the closest
         # to the average value
-        closest_to_average = min(intensities, key=lambda x: abs(x - average))
-        maximum = max(intensities)
-        synthesis = ar_intensity_with_cords[maximum]
+        closest_to_average = min(regions, key=lambda x: abs(x - average))
+        maximum = max(regions)
+        synthesis, pixel_coord = ar_intensity_with_cords[maximum]
 
-        carrington_pixel_contours.append(synthesis)
+        all_contours_carr.append(synthesis)
+        all_contours_pix.append(pixel_coord)
 
-    # Return contours in carrington and pixel coordinates
-    # (Pixel will be needed for sunspots synthesis)
-    return carrington_pixel_contours
+    return all_contours_carr
 
 
 # ar_intensities - array with ar intensities
@@ -161,13 +160,13 @@ def calculate_average_ar_intensity(ar_intensities):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2003-09-25T00:00:00', '2003-10-24T00:00:00', 'AR')
+    data = DataAccess('2003-09-30T00:00:00', '2003-10-24T00:00:00', 'AR')
 
     chain_encoded = prep.encode_and_split(data.get_chain_code())
 
-    cords2 = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(),
+    synthesis = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(),
                          data.get_noaa_number(), data.get_ar_id(), data.get_date())
 
-    prep.display_object(cords2)
+    prep.display_object(synthesis)
 
 

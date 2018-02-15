@@ -49,10 +49,9 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
             print("RESULT NULL")
             # Calculate ar contour in pixel, carrington longitude and latitude
             ar, lon, lat = prep.get_shape(coords=c, xpos=xpos, ypos=ypos, file=file)
-            print(ar)
             all_contours_pix.append(ar)
             ar_inten = calculate_ar_intensity(ar, file)
-            db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat])
+            db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat], ar)
 
             broken = max(lon) - min(lon) > 358  # check if object go through the end of map and finish at the beginning
             if not broken:
@@ -62,11 +61,11 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 
         counter += 1
 
-
+    print("!!!!", len(all_coords_carr), len(all_contours_pix))
     mer = merge_id_with_ar(all_coords_carr, all_contours_pix, all_track, all_intensities)
-    syn = make_synthesis(mer)
+    carrington_synthesis, pixel_synthesis = make_synthesis(mer)
 
-    return syn
+    return carrington_synthesis, pixel_synthesis
 
 
 # Creates dictionary where key is track_id of active region
@@ -137,12 +136,12 @@ def make_synthesis(ar_with_id):
         # to the average value
         closest_to_average = min(regions, key=lambda x: abs(x - average))
         maximum = max(regions)
-        synthesis, pixel_coord = ar_intensity_with_cords[maximum]
+        synthesis, pixel_coord = ar_intensity_with_cords[closest_to_average]
 
         all_contours_carr.append(synthesis)
         all_contours_pix.append(pixel_coord)
 
-    return all_contours_carr
+    return all_contours_carr, all_contours_pix
 
 
 # ar_intensities - array with ar intensities
@@ -160,13 +159,28 @@ def calculate_average_ar_intensity(ar_intensities):
 if __name__ == '__main__':
     from DataAccess import DataAccess
 
-    data = DataAccess('2003-09-30T00:00:00', '2003-10-24T00:00:00', 'AR')
+    ar_data = DataAccess('2003-09-26T00:00:00', '2003-10-05T00:00:00', 'AR')
 
-    chain_encoded = prep.encode_and_split(data.get_chain_code())
+    ar_chain_encoded = prep.encode_and_split(ar_data.get_chain_code())
 
-    synthesis = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(), data.get_filename(),
-                         data.get_noaa_number(), data.get_ar_id(), data.get_date())
+    ar_carr_synthesis, ar_pix_synthesis = get_shapes(ar_chain_encoded, ar_data.get_pixel_start_x(), ar_data.get_pixel_start_y(), ar_data.get_filename(),
+                                               ar_data.get_noaa_number(), ar_data.get_ar_id(), ar_data.get_date())
 
-    prep.display_object(synthesis)
+    # print(len(ar_pix_synthesis), len(ar_carr_synthesis))
+
+    import Sunspot as sp
+
+    sp_data = DataAccess('2003-09-26T00:00:00', '2003-10-24T00:00:00', 'SP')
+
+    sp_chain_encoded = prep.encode_and_split(sp_data.get_chain_code())
+
+    sp_carr, sp_pix = sp.get_shapes(sp_chain_encoded, sp_data.get_pixel_start_x(), sp_data.get_pixel_start_y(),
+                                sp_data.get_filename(), sp_data.get_sp_id(), sp_data.get_date())
+
+    # print(list(zip(sp_carr[0][0], sp_carr[0][1]))) !!!!!!!!!!!!!!!!!!!!
+
+    sp_synthesis = sp.make_sp_synthesis(ar_contour=ar_carr_synthesis, sp_carr=sp_carr)
+
+    prep.display_object(ar_carr_synthesis, sp_synthesis)
 
 

@@ -16,6 +16,8 @@ import json
 import sqlite3
 import Database as db
 import ObjectPreparation as prep
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 
 # Go through array with chain code, convert to carrington, draw contour of shape
@@ -48,12 +50,12 @@ def get_shapes(chains, startx, starty, filename, sp_id, date):
             broken = (max(result[0][0][0]) - min(result[0][0][0])) > 358
             if not broken:
                 all_coords_carr += result[0]
-                all_contours_pix.append(result[1])
+                all_contours_pix += (result[1])
         else:
             print("RESULT NULL")
             # Calculate ar contour in pixel, carrington longitude and latitude
             sp_pix, lon, lat = prep.get_shape(coords=c, xpos=xpos, ypos=ypos, file=file)
-            print(sp_pix)
+            print("pix", sp_pix)
             all_contours_pix.append(sp_pix)
             db.add_sunspot_to_database(sp_id=s_id, date=sp_date, carr_coords=[lon, lat], pix_coords=sp_pix)
 
@@ -63,7 +65,7 @@ def get_shapes(chains, startx, starty, filename, sp_id, date):
 
         counter += 1
 
-    return all_coords_carr
+    return all_coords_carr, all_contours_pix
 
 
 
@@ -71,9 +73,8 @@ def get_shapes(chains, startx, starty, filename, sp_id, date):
 # To avoid drawing sunspots more than one time
 # We gonna merge sp with id to be sure that is drawn only once
 # def merge_sunspotid_with_pixel(sp_id, pixel_coordinates):
-
-
-def make_sp_synthesis(ar_contour, sp_contour):
+#
+def make_sp_synthesis(ar_contour, sp_carr):
     # For each active region (after synthesis), every point of
     # each sunspot is tested.
     # If proportion of success tests and the length of
@@ -81,27 +82,61 @@ def make_sp_synthesis(ar_contour, sp_contour):
     # sunspot will be drawn on map.
     sunspots = []
 
-    for sp in sp_contour:  # go through each sp
-        print("SP", sp)
+    for sp in sp_carr:  # go through each sp
+        sp_zip = list(zip(sp[0], sp[1]))
         for ar in ar_contour:  # go through each ar
+            ar_zip = list(zip(ar[0], ar[1]))
+            ar = Polygon(np.array(ar_zip))
+            print("AR in SP SYN", ar)
             result = []
-            ar = np.array(ar)
-            for s in sp:  # go through each point of sp
-                s = (s[0], s[1])
-                point_test = cv2.pointPolygonTest(ar, s, False)
-                print(point_test)
-                if point_test == 1.0 or 0.0:
-                    result.append(point_test)
+            for p in sp_zip:  # go through each point of sp
+                p = Point(p[0], p[1])
+                test = ar.contains(p)
+                print(test)
+                if test:
+                    result.append(test)
 
-            proportion = len(result)/len(sp)
-            if(proportion == 1.0):
-                sunspots.append(sp_contour)
-            print("Proportion:", len(result)/len(sp))
+            proportion = len(result)/len(sp_zip)
+            if proportion == 1.0:
+                sunspots.append(sp)
+                print("ADDED")
+                break
+            print("Proportion:", len(result)/len(sp_zip))
+    print("Sunspots len", len(sunspots))
+    return sunspots
 
+
+def display_object(ar_patch):
+    print("display_object() START ")
+    fig, ax = plt.subplots(1, figsize=(10, 5))
+
+    latitude_start = -90
+    latitude_end = 90
+    longitude_start = 0
+    longitude_end = 360
+    break_between = 30
+    break_between_minor = 10
+
+    ax.set_xlim(longitude_start, longitude_end)
+    ax.set_ylim(latitude_start, latitude_end)
+    ax.set_xticks(np.arange(longitude_start, longitude_end, break_between_minor), minor=True)
+    ax.set_yticks(np.arange(latitude_start, latitude_end, break_between_minor), minor=True)
+    ax.set_xticks(np.arange(longitude_start, longitude_end, break_between))
+    ax.set_yticks(np.arange(latitude_start, latitude_end, break_between))
+
+    ax.grid(which='both')
+
+    # push grid lines behind the elements
+    from descartes import PolygonPatch
+    ax.set_axisbelow(True)
+    ar_patch = PolygonPatch(ar_patch)
+    ax.add_patch(ar_patch)
+
+    plt.show()
 
 if __name__ == '__main__':
     from DataAccess import DataAccess
-    data = DataAccess('2010-01-01T00:00:00', '2010-01-01T02:59:00', 'SP')
+    data = DataAccess('2003-10-21T00:00:00', '2003-10-24T00:00:00', 'SP')
 
     chain_encoded = prep.encode_and_split(data.get_chain_code())
 

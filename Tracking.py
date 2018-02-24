@@ -6,8 +6,20 @@ from DataAccess import DataAccess
 import sunpy.map
 
 
-# data = DataAccess('2003-09-26T00:00:00', '2003-09-27T00:00:00', 'FIL')
-#
+data = DataAccess('2003-09-26T00:00:00', '2003-09-27T00:00:00', 'FIL')
+data1 = DataAccess('2003-09-27T00:00:00', '2003-09-28T00:00:00', 'FIL')
+data2 = DataAccess('2003-09-28T00:00:00', '2003-09-29T00:00:00', 'FIL')
+
+centers_x1 = data.get_center_x()
+centers_x2 = data1.get_center_x()
+centers_x3 = data2.get_center_x()
+
+centers_y1 = data.get_center_y()
+centers_y2 = data1.get_center_y()
+centers_y3 = data2.get_center_y()
+
+print(centers_x1)
+
 # chain_encoded = prep.encode_and_split(data.get_chain_code())
 #
 # carr_synthesis, pix = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(),
@@ -18,8 +30,7 @@ img = np.array(map.data, dtype=np.int16)
 print(img)
 #frame = np.zeros((800, 800, 3), np.uint8)
 frame = img
-last_measurement = current_measurement = np.array((2,1),
-np.float32)
+last_measurement = current_measurement = np.array((2,1), np.float32)
 last_prediction = current_prediction = np.zeros((2,1), np.float32)
 
 

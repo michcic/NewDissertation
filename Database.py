@@ -115,7 +115,7 @@ def add_fl_to_database(fl_id, date, track_id, carr_coords, pix_coords):
     # encode coordinates to json
     carr_js = json.dumps(carr_coords)
     pix_js = json.dumps(pix_coords, cls=Encoder)
-    curs.execute('''INSERT INTO ar_test2(fl_id, date, track_id, carrington_coordinates, 
+    curs.execute('''INSERT INTO filaments(fl_id, date, track_id, carrington_coordinates, 
         pixel_coordinates) VALUES(?,?,?,?,?)''', (fl_id, date, track_id, carr_js, pix_js,))
 
     conn.commit()
@@ -125,7 +125,7 @@ def add_fl_to_database(fl_id, date, track_id, carr_coords, pix_coords):
 def load_fl_from_database(fl_id):
     conn = sqlite3.connect('ar_carrington.db')
     curs = conn.cursor()
-    sql = 'SELECT track_id, carrington_coordinates, pixel_coordinates FROM ar_test2 WHERE fl_id = ?'
+    sql = 'SELECT track_id, carrington_coordinates, pixel_coordinates FROM filaments WHERE fl_id = ?'
     id = str(fl_id)
 
     # execute sql query
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     # c = curs.execute('''PRAGMA table_info(ar_test2) ''')
     # curs.execute('''CREATE TABLE filaments(fl_id PRIMARY KEY, date, track_id, carrington_coordinates, pixel_coordinates)''')
     # curs.execute('''DROP TABLE filaments''')
-    # curs.execute('''DELETE from sunspots''')
+    # curs.execute('''DELETE from filaments''')
     # for r in c:
     #     print(r)
     conn.commit()

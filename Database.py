@@ -103,6 +103,51 @@ def load_sp_from_database(ar_id):
     return decoded_carr_coords, decoded_pix_coords
 
 
+# Adds active region to database
+def add_fl_to_database(fl_id, date, track_id, carr_coords, pix_coords):
+    conn = sqlite3.connect('ar_carrington.db')
+    curs = conn.cursor()
+
+    fl_id = str(fl_id)
+    date = str(date)
+    track_id = str(track_id)
+
+    # encode coordinates to json
+    carr_js = json.dumps(carr_coords)
+    pix_js = json.dumps(pix_coords, cls=Encoder)
+    curs.execute('''INSERT INTO ar_test2(fl_id, date, track_id, carrington_coordinates, 
+        pixel_coordinates) VALUES(?,?,?,?,?)''', (fl_id, date, track_id, carr_js, pix_js,))
+
+    conn.commit()
+    conn.close()
+
+# Retrieves filaments data from the database
+def load_fl_from_database(fl_id):
+    conn = sqlite3.connect('ar_carrington.db')
+    curs = conn.cursor()
+    sql = 'SELECT track_id, carrington_coordinates, pixel_coordinates FROM ar_test2 WHERE fl_id = ?'
+    id = str(fl_id)
+
+    # execute sql query
+    c = curs.execute(sql, (id,)).fetchall()
+
+    track_id = []
+    decoded_carr_coords = []
+    decoded_pix_coords = []
+
+    # go through the result and append data to arrays
+    for result in c:
+        track_id.append(result[0])
+        # decode the coordinates
+        decoded_carr_coords.append(json.loads(result[1]))
+        decoded_pix_coords.append(json.loads(result[2]))
+
+    conn.close()
+    print("TRACK_ID", track_id)
+
+    return track_id, decoded_carr_coords, decoded_pix_coords
+
+
 def delete_from_database():
     conn = sqlite3.connect('ar_carrington.db')
     curs = conn.cursor()
@@ -138,9 +183,10 @@ class Encoder(json.JSONEncoder):
 if __name__ == '__main__':
     conn = sqlite3.connect('ar_carrington.db')
     curs = conn.cursor()
-    #c = curs.execute('''PRAGMA table_info(ar_test2) ''')
-    curs.execute('''CREATE TABLE sunspots(sp_id PRIMARY KEY, date, carrington_coordinates, pixel_coordinates)''')
-    #curs.execute('''DROP TABLE sunspots''')
+    # c = curs.execute('''PRAGMA table_info(ar_test2) ''')
+    # curs.execute('''CREATE TABLE filaments(fl_id PRIMARY KEY, date, track_id, carrington_coordinates, pixel_coordinates)''')
+    # curs.execute('''DROP TABLE filaments''')
+    # curs.execute('''DELETE from sunspots''')
     # for r in c:
     #     print(r)
     conn.commit()

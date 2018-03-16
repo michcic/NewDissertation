@@ -90,47 +90,66 @@ def merge_id_with_object(dates, chains, start_pos, track_id):
 
 
 def make_synthesis(merged_objects):
+    # go through filament chain code, dates, and starting position of pixel
     for id, chain_a_date in merged_objects.items():
         date_with_chain_pos = []
         chain_lenghts = []
+        # creates new list with dates, chain code and starting position only
+        # also, calculates filaments length
         for single_chain_date_pos in chain_a_date:
             date_with_chain_pos.append([single_chain_date_pos[0], single_chain_date_pos[1], single_chain_date_pos[2]])
             chain_lenghts.append(len(single_chain_date_pos[1]))
 
         biggest = chain_lenghts.index(max(chain_lenghts))  # return position of the biggest filament
 
+        # reconstruct the biggest filament in the pixel coordinate system
         bigg_fil = get_shape(date_with_chain_pos[biggest][1], date_with_chain_pos[biggest][2][0],
                              date_with_chain_pos[biggest][2][1])
 
         # there start_pos of the biggest filament need to be used!
         small_fil = []
 
+        # reconstruct the rest of the filaments
         for x in range(0,len(date_with_chain_pos)):
             if not x == biggest:
                 smaller = get_shape(date_with_chain_pos[x][1], date_with_chain_pos[biggest][2][0],
                           date_with_chain_pos[biggest][2][1])
 
                 smaller = np.array([smaller], dtype=np.int32)
+                # find the smallest x and y
+                x = np.min(np.min(smaller, axis=1), axis=0)
+
+                # find the smallest distance between min point of
+                # smaller filament and some point of biggest filament!!!
+                # WORKS!
+                from scipy.spatial.distance import cdist
+                npa = np.array(bigg_fil, dtype=np.int32)
+                c = cdist(npa, [x]).argmin()
+
+                print("npa", npa)
+                c = int(c)
+                print("X", x)
+                print("NPA MIN",npa[c])
+
                 small_fil.append(smaller)
 
 
 
         npa = np.array([bigg_fil], dtype=np.int32)
         # npa2 = np.array([small_fil], dtype=np.int32)
-        print(npa)
 
-        im = Image.new('RGB', (1200, 1200), (255, 255, 255))
-
-        cv_image = np.array(im)  # convert PIL image to opencv image
-        cv2.fillPoly(cv_image, pts=npa, color=(0, 0, 0))
-
-        from random import randint
-
-        for npa2 in small_fil:
-            cv2.fillPoly(cv_image, pts=npa2, color=(0, randint(100,255), randint(50,255)))
-
-        cv2.imshow("", cv_image)
-        cv2.waitKey(10000)
+        # im = Image.new('RGB', (1200, 1200), (255, 255, 255))
+        #
+        # cv_image = np.array(im)  # convert PIL image to opencv image
+        # cv2.fillPoly(cv_image, pts=npa, color=(0, 0, 0))
+        #
+        # from random import randint
+        #
+        # for npa2 in small_fil:
+        #     cv2.fillPoly(cv_image, pts=npa2, color=(0, randint(100,255), randint(50,255)))
+        #
+        # cv2.imshow("", cv_image)
+        # cv2.waitKey(10000)
 
 
 

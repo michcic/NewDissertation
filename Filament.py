@@ -149,22 +149,22 @@ def make_synthesis(merged_objects):
                 ax.set_xticks(np.arange(longitude_start, longitude_end, break_between))
                 ax.set_yticks(np.arange(latitude_start, latitude_end, break_between))
 
+                # plot the biggest one
                 for c in npa:
                     plt.plot(c[0], c[1], 'go')
 
                 smaller = np.array(smaller, dtype=np.int32)
 
+                # go through smaller one coordinates
                 for sm in smaller:
                     for s in sm:
                         print("S", s)
                         print("npa", npa)
+                        # find the index of the closest pixel of biggest filament
                         closest = cdist([s], npa).argmin()
                         dist = int(closest)
+                        # overlay that pixel with blue point
                         plt.plot(npa[dist][0], npa[dist][1], 'bo')
-
-                for sm in smaller:
-                    for s in sm:
-                        plt.plot(s[0], s[1], 'ro')
 
                 plt.show()
 

@@ -5,7 +5,7 @@ from functools import reduce
 from PIL import Image
 import cv2
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 # Go through array with chain code, convert to carrington, draw contour of shape
 # using chain code.
@@ -127,17 +127,51 @@ def make_synthesis(merged_objects):
                 c = cdist(npa, [x]).argmin()
 
                 print("npa", npa)
-                c = int(c)
+                dist = int(c)
                 print("X", x)
-                print("NPA MIN",npa[c])
+                print("NPA MIN",npa[dist])
 
                 small_fil.append(smaller)
 
+                fig, ax = plt.subplots(1, figsize=(10, 5))
 
+                latitude_start = 0
+                latitude_end = 500
+                longitude_start = 0
+                longitude_end = 500
+                break_between = 30
+                break_between_minor = 10
 
-        npa = np.array([bigg_fil], dtype=np.int32)
+                ax.set_xlim(longitude_start, longitude_end)
+                ax.set_ylim(latitude_start, latitude_end)
+                ax.set_xticks(np.arange(longitude_start, longitude_end, break_between_minor), minor=True)
+                ax.set_yticks(np.arange(latitude_start, latitude_end, break_between_minor), minor=True)
+                ax.set_xticks(np.arange(longitude_start, longitude_end, break_between))
+                ax.set_yticks(np.arange(latitude_start, latitude_end, break_between))
+
+                for c in npa:
+                    plt.plot(c[0], c[1], 'go')
+
+                smaller = np.array(smaller, dtype=np.int32)
+
+                for sm in smaller:
+                    for s in sm:
+                        print("S", s)
+                        print("npa", npa)
+                        closest = cdist([s], npa).argmin()
+                        dist = int(closest)
+                        plt.plot(npa[dist][0], npa[dist][1], 'bo')
+
+                for sm in smaller:
+                    for s in sm:
+                        plt.plot(s[0], s[1], 'ro')
+
+                plt.show()
+
+        # ------------------------------------
+        # npa = np.array([bigg_fil], dtype=np.int32)
         # npa2 = np.array([small_fil], dtype=np.int32)
-
+        #
         # im = Image.new('RGB', (1200, 1200), (255, 255, 255))
         #
         # cv_image = np.array(im)  # convert PIL image to opencv image

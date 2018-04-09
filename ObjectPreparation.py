@@ -1,26 +1,15 @@
 import numpy as np
 import matplotlib as plt
-from astropy.coordinates import SkyCoord
 import sunpy.map
 import matplotlib.pyplot as plt
 from sunpy.coordinates import frames
 import astropy.units as u
-import matplotlib
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 import math
-from descartes import PolygonPatch
-from PIL import Image
-import cv2
-import json
-import sqlite3
-import Database as db
 
 
 # Function takes array with chain codes, encode the chain code,
 # then splits into array
-def encode_and_split(chain_codes):
-    print("encode_and_split() START")
+def decode_and_split(chain_codes):
     codes = []
 
     for chains in chain_codes:
@@ -33,7 +22,8 @@ def encode_and_split(chain_codes):
     return codes
 
 
-def encode_filename(filenames):
+# Decodes array with files names
+def decode_filename(filenames):
     files = []
 
     for f in filenames:
@@ -45,7 +35,9 @@ def encode_filename(filenames):
 
     return files
 
-def encode_date(dates):
+
+# decodes array with dates of observations
+def decode_date(dates):
     decoded_dates = []
 
     for x in dates:
@@ -57,11 +49,15 @@ def encode_date(dates):
     return decoded_dates
 
 
-def get_shape(coords, xpos, ypos, file):
+# Takes chain code and position of the first pixel,
+# reconstructs object in pixel coordinate, then
+# it converts a object from pixel to Carrington system
+def get_shape(chain, xpos, ypos, file):
     lon = []
     lat = []
-    ar = []
-    for d in coords:
+    obj = []
+    print(xpos)
+    for d in chain:
         if d == 0:
             xpos -= 1
         elif d == 1:
@@ -83,35 +79,32 @@ def get_shape(coords, xpos, ypos, file):
             ypos += 1
             xpos -= 1
 
-        ar.append([xpos, ypos])
+        obj.append([xpos, ypos])
         carr = convert_to_carrington(xpos, ypos, file)
+        # Checks if result of convertion is NaN
         if not (math.isnan(carr.lon.deg) or math.isnan(carr.lat.deg)):
             lon.append(carr.lon.deg)  # Add calculated position to array
             lat.append(carr.lat.deg)
         else:
             print("Problem with converting pixel. It will be ignored.")
 
-    return ar, lon, lat
+    return obj, lon, lat
 
 
 # Function converts from pixel coordinates to Carrington
-def convert_to_carrington(lon, lat, filename):
-    #print("convert_to_carrington() START ")
-    #print('long = {0} lat =  {1}'.format(lon, lat))
+def convert_to_carrington(x, y, filename):
     filename = "images//" + filename
     map = sunpy.map.Map(filename)
-    # convert from pixel to picture coordinate system
-    cords = map.pixel_to_world(lon * u.pix, lat * u.pix)
+    # convert from pixel to image coordinate system
+    cords = map.pixel_to_world(x * u.pix, y * u.pix)
     # convert from picture coordinate frame to carrington
     carr = cords.transform_to(frames.HeliographicCarrington)
 
     return carr
 
 
-def display_object(ar_coordinates):
-    print("display_object() START ")
-    # fig = plt.figure(1, figsize=(10, 5), dpi=90)
-    # ax = fig.add_subplot(111)
+# Visualise synthesis of features
+def display_object(ar_coordinates, sp_coordinates):
     fig, ax = plt.subplots(1, figsize=(10, 5))
 
     latitude_start = -90
@@ -134,11 +127,9 @@ def display_object(ar_coordinates):
     ax.set_axisbelow(True)
 
     for c in ar_coordinates:
-        #plt.scatter(c[0], c[1], marker='o', s=1)
-        plt.fill(c[0], c[1])
+        plt.fill(c[0], c[1], "g")
 
-    # for c in sp_coordinates:
-    #     #plt.scatter(c[0], c[1], marker='o', s=1)
-    #     plt.fill(c[0], c[1])
+    for c in sp_coordinates:
+        plt.fill(c[0], c[1], "b")
 
     plt.show()

@@ -12,9 +12,6 @@ def add_ar_to_database(ar_id, date, track_id, ar_intensity, carr_coords, pix_coo
     date = str(date)
     track_id = str(track_id)
 
-    # curs.execute('''CREATE TABLE ar_test3(ar_id PRIMARY KEY, date, track_id,
-    # ar_intensity, coordinates)''')
-
     carr_js = json.dumps(carr_coords)
     pix_js = json.dumps(pix_coords, cls=Encoder)
     curs.execute('''INSERT INTO ar_test2(ar_id, date, track_id,
@@ -30,9 +27,6 @@ def add_sunspot_to_database(sp_id, date, carr_coords, pix_coords):
 
     sp_id = str(sp_id)
     date = str(date)
-
-    # curs.execute('''CREATE TABLE ar_test3(ar_id PRIMARY KEY, date, track_id,
-    #  ar_intensity, coordinates)''')
 
     carr_js = json.dumps(carr_coords)
     pix_js = json.dumps(pix_coords, cls=Encoder)
@@ -63,7 +57,6 @@ def load_ar_from_database(ar_id):
         decoded_pix_coords.append(json.loads(result[3]))
 
     conn.close()
-    print("TRACK_ID", track_id)
 
     return track_id, ar_intensity, decoded_carr_coords, decoded_pix_coords
 
@@ -129,7 +122,6 @@ def load_fl_from_database(fl_id):
         decoded_carr_coords.append(json.loads(result[2]))
 
     conn.close()
-    print("TRACK_ID", track_id)
 
     return track_id, date, decoded_carr_coords
 

@@ -1,15 +1,7 @@
-import astropy
-from astropy.io.votable import parse
-from astropy.table import Table
 import urllib.request
 import urllib.parse
-import xml.etree.ElementTree as ET
 from astropy.io.votable import parse_single_table
-import sunpy.map as sun
-import matplotlib.pyplot as plt
 
-import numpy as np
-import cv2
 
 class DataAccess:
     def __init__(self, start_date, end_date, feature, observatory, instrument):
@@ -52,38 +44,32 @@ class DataAccess:
 
     # Returns NOAA numbers of objects
     def get_noaa_number(self):
-        print("get_noaa_number START")
         noaa = self.table.array['NOAA_NUMBER']
         return noaa
 
     # Returns file names of original FITS images
     # From where objects were taken
     def get_filename(self):
-        print("get_filename START")
         filename = self.table.array['FILENAME']
         return filename
 
     # Returns observation dates of objects
     def get_date(self):
-        print("get_date START")
         date = self.table.array['DATE_OBS']
         return date
 
     # Returns active regions id
     def get_ar_id(self):
-        print("get_ar_id START")
         id = self.table.array['ID_AR']
         return id
 
     # Returns sunspots id
     def get_sp_id(self):
-        print("get_ar_id START")
         id = self.table.array['ID_SUNSPOT']
         return id
 
     # Returns filaments id
     def get_fil_id(self):
-        print("get_fil_id START")
         id = self.table.array['ID_FIL']
         return id
 
@@ -142,7 +128,6 @@ class DataAccess:
     # def dimension1(self):
     #     id = self.table.array['NAXIS2']
     #     return id
-
 
 
 if __name__ == '__main__':

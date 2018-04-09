@@ -1,19 +1,22 @@
 import numpy as np
 import sunpy.map
-import math
 from PIL import Image
 import cv2
 import Database as db
 import ObjectPreparation as prep
 
 
-
-# Go through array with chain code, convert to carrington, draw contour of shape
-# using chain code.
+# Function reconstructs active region using chain code,
+# convert pixel coordinate to Carrington coordinate system,
+# make synthesis of observation and returns carrington coordinates as well
+# as pixel coordinates (needed for sunspot synthesis)
 # chains - 2D array with chain codes
 # startx - x coordinate of chain code start position in pixels
 # starty - y coordinate of chain code start position in pixels
-# return - array with coordinates of the contour of the object
+# filname - array with filenames of original FITS images
+# track_id - track_id of objects
+# ar_id - id of active regions
+# date - date of observation of active regions
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     print("get_shapes() START")
     filename = prep.encode_filename(filename)
@@ -28,14 +31,13 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
     for c in chains:
         xpos = startx[counter]  # Starting position of contour
         ypos = starty[counter]
-        t_id = track_id[counter]
-        a_id = ar_id[counter]
-        print("ID", a_id)
-        file = filename[counter]
-        ar_date = date[counter]
+        t_id = track_id[counter]    # tracking data
+        a_id = ar_id[counter]      # unique id
+        file = filename[counter]   # filename
+        ar_date = date[counter]    # date of observation
 
         # Check if exists in database
-        result = db.load_from_database(a_id)
+        result = db.load_ar_from_database(a_id)
         if not result == ([], [], [], []):
             print("RESULT NOT NULL")
             # check if object go through the end of map and finish at the beginning
@@ -48,10 +50,10 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         else:
             print("RESULT NULL")
             # Calculate ar contour in pixel, carrington longitude and latitude
-            ar, lon, lat = prep.get_shape(coords=c, xpos=xpos, ypos=ypos, file=file)
+            ar, lon, lat = prep.get_shape(chain=c, xpos=xpos, ypos=ypos, file=file)
             all_contours_pix.append(ar)
             ar_inten = calculate_ar_intensity(ar, file)
-            db.add_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat], ar)
+            db.add_ar_to_database(a_id, ar_date, t_id, ar_inten, [lon, lat], ar)
 
             broken = max(lon) - min(lon) > 358  # check if object go through the end of map and finish at the beginning
             if not broken:
@@ -62,7 +64,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         counter += 1
 
     print("!!!!", len(all_coords_carr), len(all_contours_pix))
-    mer = merge_id_with_ar(all_coords_carr, all_contours_pix, all_track, all_intensities)
+    mer = merge_id_with_object(all_coords_carr, all_contours_pix, all_track, all_intensities)
     carrington_synthesis, pixel_synthesis = make_synthesis(mer)
 
     return carrington_synthesis, pixel_synthesis
@@ -71,7 +73,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 # Creates dictionary where key is track_id of active region
 # and values are tuple of ar's intensity, carrington coordinates and
 # pixel coordinates
-def merge_id_with_ar(carr_coords, pix_coords,  track_id, ar_intensity):
+def merge_id_with_object(carr_coords, pix_coords,  track_id, ar_intensity):
     print("merge_id_with_ar START")
     ar_with_id = {}
     ar_with_id[track_id[0]] = [(ar_intensity[0], carr_coords[0], pix_coords[0])]
@@ -89,8 +91,7 @@ def merge_id_with_ar(carr_coords, pix_coords,  track_id, ar_intensity):
 # Ar contour is drawn using pixel coordinate system
 # AR is filled with black colour
 # Function checks then which pixels are black and reveal indexes of these pixels
-def get_contour_pixels_indexes(contour, image_shape):
-    print("get_contour_pixels_indexes() START ")
+def get_contour_pixels_indexes(contour):
     contour = np.array(contour)
     im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of FITS image size
     cv_image = np.array(im)  # convert PIL image to opencv image
@@ -103,7 +104,6 @@ def get_contour_pixels_indexes(contour, image_shape):
 # coord - coordinates of contour of ar
 # filename - FITS file associated with that ar
 def calculate_ar_intensity(coord, filename):
-    print("calculate_ar_intensity() START ")
     filename = "images//" + filename
     coord = get_contour_pixels_indexes(coord, filename)  # find all pixels inside the contour
     pixels_number = len(coord)
@@ -136,7 +136,7 @@ def make_synthesis(ar_with_id):
         # to the average value
         closest_to_average = min(regions, key=lambda x: abs(x - average))
         maximum = max(regions)
-        synthesis, pixel_coord = ar_intensity_with_cords[closest_to_average]
+        synthesis, pixel_coord = ar_intensity_with_cords[maximum]
 
         all_contours_carr.append(synthesis)
         all_contours_pix.append(pixel_coord)
@@ -144,9 +144,9 @@ def make_synthesis(ar_with_id):
     return all_contours_carr, all_contours_pix
 
 
+# Calculates average instensity of active regions
 # ar_intensities - array with ar intensities
 def calculate_average_ar_intensity(ar_intensities):
-    print("calculate_average_ar_intensity() START ")
     sum = 0
     # go through array of pixel values and add them
     for x in ar_intensities:
@@ -157,30 +157,17 @@ def calculate_average_ar_intensity(ar_intensities):
 
 
 if __name__ == '__main__':
+    # Active rregion test
     from DataAccess import DataAccess
 
-    ar_data = DataAccess('2003-09-26T00:00:00', '2003-10-05T00:00:00', 'AR')
+    ar_data = DataAccess('2003-10-24T00:00:00', '2003-10-24T02:00:00', 'AR', 'SOHO', 'MDI')
 
     ar_chain_encoded = prep.encode_and_split(ar_data.get_chain_code())
 
-    ar_carr_synthesis, ar_pix_synthesis = get_shapes(ar_chain_encoded, ar_data.get_pixel_start_x(), ar_data.get_pixel_start_y(), ar_data.get_filename(),
+    ar_carr_synthesis, ar_pix_synthesis = get_shapes(ar_chain_encoded, ar_data.get_pixel_start_x(),
+                                                     ar_data.get_pixel_start_y(), ar_data.get_filename(),
                                                ar_data.get_noaa_number(), ar_data.get_ar_id(), ar_data.get_date())
 
-    # print(len(ar_pix_synthesis), len(ar_carr_synthesis))
+    from ObjectPreparation import display_object
 
-    import Sunspot as sp
-
-    sp_data = DataAccess('2003-09-26T00:00:00', '2003-10-24T00:00:00', 'SP')
-
-    sp_chain_encoded = prep.encode_and_split(sp_data.get_chain_code())
-
-    sp_carr, sp_pix = sp.get_shapes(sp_chain_encoded, sp_data.get_pixel_start_x(), sp_data.get_pixel_start_y(),
-                                sp_data.get_filename(), sp_data.get_sp_id(), sp_data.get_date())
-
-    # print(list(zip(sp_carr[0][0], sp_carr[0][1]))) !!!!!!!!!!!!!!!!!!!!
-
-    sp_synthesis = sp.make_sp_synthesis(ar_contour=ar_carr_synthesis, sp_carr=sp_carr)
-
-    prep.display_object(ar_carr_synthesis, sp_synthesis)
-
-
+    display_object(ar_carr_synthesis, [])

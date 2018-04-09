@@ -18,7 +18,6 @@ import ObjectPreparation as prep
 # ar_id - id of active regions
 # date - date of observation of active regions
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
-    print("get_shapes() START")
     filename = prep.encode_filename(filename)
     date = prep.encode_date(date)
     all_track = []
@@ -39,7 +38,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         # Check if exists in database
         result = db.load_ar_from_database(a_id)
         if not result == ([], [], [], []):
-            print("RESULT NOT NULL")
             # check if object go through the end of map and finish at the beginning
             broken = (max(result[2][0][0]) - min(result[2][0][0])) > 358
             if not broken:
@@ -48,7 +46,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
                 all_coords_carr += result[2]
                 all_contours_pix.append(result[3])
         else:
-            print("RESULT NULL")
             # Calculate ar contour in pixel, carrington longitude and latitude
             ar, lon, lat = prep.get_shape(chain=c, xpos=xpos, ypos=ypos, file=file)
             all_contours_pix.append(ar)
@@ -63,7 +60,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 
         counter += 1
 
-    print("!!!!", len(all_coords_carr), len(all_contours_pix))
     mer = merge_id_with_object(all_coords_carr, all_contours_pix, all_track, all_intensities)
     carrington_synthesis, pixel_synthesis = make_synthesis(mer)
 
@@ -74,7 +70,6 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
 # and values are tuple of ar's intensity, carrington coordinates and
 # pixel coordinates
 def merge_id_with_object(carr_coords, pix_coords,  track_id, ar_intensity):
-    print("merge_id_with_ar START")
     ar_with_id = {}
     ar_with_id[track_id[0]] = [(ar_intensity[0], carr_coords[0], pix_coords[0])]
     if len(carr_coords) == len(track_id):

@@ -18,8 +18,8 @@ import ObjectPreparation as prep
 # ar_id - id of active regions
 # date - date of observation of active regions
 def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
-    filename = prep.encode_filename(filename)
-    date = prep.encode_date(date)
+    filename = prep.decode_filename(filename)
+    date = prep.decode_date(date)
     all_track = []
     all_intensities = []
     all_coords_carr = []
@@ -152,12 +152,12 @@ def calculate_average_ar_intensity(ar_intensities):
 
 
 if __name__ == '__main__':
-    # Active rregion test
+    # ActiveRegion + ObjectPreparation test
     from DataAccess import DataAccess
 
     ar_data = DataAccess('2003-10-24T00:00:00', '2003-10-24T02:00:00', 'AR', 'SOHO', 'MDI')
 
-    ar_chain_encoded = prep.encode_and_split(ar_data.get_chain_code())
+    ar_chain_encoded = prep.decode_and_split(ar_data.get_chain_code())
 
     ar_carr_synthesis, ar_pix_synthesis = get_shapes(ar_chain_encoded, ar_data.get_pixel_start_x(),
                                                      ar_data.get_pixel_start_y(), ar_data.get_filename(),

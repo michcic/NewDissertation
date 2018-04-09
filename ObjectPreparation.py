@@ -133,3 +133,14 @@ def display_object(ar_coordinates, sp_coordinates):
         plt.fill(c[0], c[1], "b")
 
     plt.show()
+
+
+if __name__ == '__main__':
+    # DataAccess + ObjectPreparation test
+    from DataAccess import DataAccess
+
+    ar_data = DataAccess('2003-10-24T00:00:00', '2003-10-24T02:00:00', 'AR', 'SOHO', 'MDI')
+
+    print("decode_and_split() TEST", decode_and_split(ar_data.get_chain_code()))
+    print("decode_date() TEST", decode_date(ar_data.get_date()))
+    print("decode_filename() TEST", decode_filename(ar_data.get_filename()))

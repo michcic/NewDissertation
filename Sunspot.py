@@ -68,12 +68,7 @@ def get_shapes(chains, startx, starty, filename, sp_id, date):
     return all_coords_carr, all_contours_pix
 
 
-
-# Some of the active regions cover themselfs
-# To avoid drawing sunspots more than one time
-# We gonna merge sp with id to be sure that is drawn only once
-# def merge_sunspotid_with_pixel(sp_id, pixel_coordinates):
-#
+# Returns synthesis of sunspots
 def make_sp_synthesis(ar_contour, sp_carr):
     # For each active region (after synthesis), every point of
     # each sunspot is tested.
@@ -85,17 +80,21 @@ def make_sp_synthesis(ar_contour, sp_carr):
     for sp in sp_carr:  # go through each sp
         sp_zip = list(zip(sp[0], sp[1]))
         for ar in ar_contour:  # go through each ar
+            # To create polygon object longitude and latitude
+            # must be stored this way:[(lon,lat),(lon,lat)...]
             ar_zip = list(zip(ar[0], ar[1]))
             ar = Polygon(np.array(ar_zip))
             print("AR in SP SYN", ar)
             result = []
             for p in sp_zip:  # go through each point of sp
                 p = Point(p[0], p[1])
-                test = ar.contains(p)
+                test = ar.contains(p)  # Return true if point is inside of the polygon
                 print(test)
                 if test:
                     result.append(test)
 
+            # if all the points of a sunspot are inside of
+            # active region then sunspot is added to array
             proportion = len(result)/len(sp_zip)
             if proportion == 1.0:
                 sunspots.append(sp)
@@ -106,41 +105,29 @@ def make_sp_synthesis(ar_contour, sp_carr):
     return sunspots
 
 
-def display_object(ar_patch):
-    print("display_object() START ")
-    fig, ax = plt.subplots(1, figsize=(10, 5))
-
-    latitude_start = -90
-    latitude_end = 90
-    longitude_start = 0
-    longitude_end = 360
-    break_between = 30
-    break_between_minor = 10
-
-    ax.set_xlim(longitude_start, longitude_end)
-    ax.set_ylim(latitude_start, latitude_end)
-    ax.set_xticks(np.arange(longitude_start, longitude_end, break_between_minor), minor=True)
-    ax.set_yticks(np.arange(latitude_start, latitude_end, break_between_minor), minor=True)
-    ax.set_xticks(np.arange(longitude_start, longitude_end, break_between))
-    ax.set_yticks(np.arange(latitude_start, latitude_end, break_between))
-
-    ax.grid(which='both')
-
-    # push grid lines behind the elements
-    from descartes import PolygonPatch
-    ax.set_axisbelow(True)
-    ar_patch = PolygonPatch(ar_patch)
-    ax.add_patch(ar_patch)
-
-    plt.show()
-
 if __name__ == '__main__':
+    # Active region + Sunspot testing
     from DataAccess import DataAccess
-    data = DataAccess('2003-10-21T00:00:00', '2003-10-24T00:00:00', 'SP')
+    import ActiveRegion as ar
 
+    # setting active regions
+    data = DataAccess('2003-10-21T00:00:00', '2003-10-24T00:00:00', 'AR', 'SOHO', 'MDI')
     chain_encoded = prep.encode_and_split(data.get_chain_code())
+    ar_carr_synthesis, ar_pix_synthesis = ar.get_shapes(chain_encoded, data.get_pixel_start_x(),
+                                                        data.get_pixel_start_y(),
+                                               data.get_filename(),
+                                               data.get_noaa_number(), data.get_ar_id(), data.get_date())
 
-    carr_synthesis = get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(),
-                                               data.get_filename(), data.get_sp_id(), data.get_date())
+    # setting sunspots
+    sp_data = DataAccess('2003-10-21T00:00:00', '2003-10-24T00:00:00', 'SP', 'SOHO', 'MDI')
 
-    prep.display_object(carr_synthesis)
+    sp_chain_encoded = prep.encode_and_split(sp_data.get_chain_code())
+
+    sp_carr, sp_pix = get_shapes(sp_chain_encoded, sp_data.get_pixel_start_x(),
+                                 sp_data.get_pixel_start_y(),
+                                sp_data.get_filename(), sp_data.get_sp_id(), sp_data.get_date())
+
+
+    sp_synthesis = make_sp_synthesis(ar_contour=ar_carr_synthesis, sp_carr=sp_carr)
+
+    prep.display_object(ar_carr_synthesis, sp_synthesis)

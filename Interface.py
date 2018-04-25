@@ -54,29 +54,43 @@ class MainFrame(tk.Frame):
             sp = self.sp_instruments.get().split('/')
             fil = self.fil_instruments.get().split('/')
 
-            ar_obs = ar[0]
-            ar_instr = ar[1]
-            sp_obs = sp[0]
-            sp_instr = sp[1]
-            fil_obs = fil[0]
-            fil_instr = fil[1]
+            empty_input_instr = len(ar) < 2 or len(sp) < 2 or len(fil) < 2
 
-            if len(start) == 0 or len(end) == 0 or len(ar) == 0 \
-                    or len(sp) == 0 or len(fil) == 0:
+            if empty_input_instr:
                 messagebox.showerror("Error", "Some of the values are empty!")
             else:
-                create_map(start, end, ar_obs, ar_instr, sp_obs, sp_instr)
+                ar_obs = ar[0]
+                ar_instr = ar[1]
+                sp_obs = sp[0]
+                sp_instr = sp[1]
+                fil_obs = fil[0]  # For filaments (work in progress)
+                fil_instr = fil[1]
+
+                empty_input_obs = len(start) == 0 or len(end) == 0
+
+                if empty_input_obs:
+                    messagebox.showerror("Error", "Some of the values are empty!")
+                else:
+                    try:
+                        create_map(start, end, ar_obs, ar_instr, sp_obs, sp_instr)
+                    except Exception as error:
+                        print(error)
+                        if str(error) == "File not found or invalid input" or str(error) == "list index out of range":
+                            messagebox.showinfo("Sorry!", "The software works only with SOHO/MDI and MEUDON/SPECTTROHELIOGRAPH "
+                                                 "instruments. Sorry for inconvenience!")
 
         create_button = ttk.Button(container, text="Create Map", command=create)
         create_button.grid(row=5, column=0)
+
+
 
 
 def create_map(start, end, ar_obs, ar_instr, sp_obs, sp_instr):
     # setting active regions
     data = DataAccess(start, end, 'AR', ar_obs, ar_instr)
     chain_encoded = prep.decode_and_split(data.get_chain_code())
-    ar_carr_synthesis, ar_pix_synthesis = ar.get_shapes(chain_encoded, data.get_pixel_start_x(), data.get_pixel_start_y(),
-                                               data.get_filename(),
+    ar_carr_synthesis, ar_pix_synthesis = ar.get_shapes(chain_encoded, data.get_pixel_start_x(),
+                                                        data.get_pixel_start_y(), data.get_filename(),
                                                data.get_noaa_number(), data.get_ar_id(), data.get_date())
 
     # setting sunspots
@@ -86,7 +100,6 @@ def create_map(start, end, ar_obs, ar_instr, sp_obs, sp_instr):
 
     sp_carr, sp_pix = sp.get_shapes(sp_chain_encoded, sp_data.get_pixel_start_x(), sp_data.get_pixel_start_y(),
                                 sp_data.get_filename(), sp_data.get_sp_id(), sp_data.get_date())
-
 
     sp_synthesis = sp.make_sp_synthesis(ar_contour=ar_carr_synthesis, sp_carr=sp_carr)
 

@@ -73,68 +73,22 @@ class DataAccess:
         id = self.table.array['ID_FIL']
         return id
 
-    # def get_center_x(self):
-    #     print("get_center_x START")
-    #     x = self.table.array['FEAT_X_PIX']
-    #     return x
-    #
-    # def get_center_y(self):
-    #     print("get_center_y START")
-    #     y = self.table.array['FEAT_Y_PIX']
-    #     return y
-    #
-    # def get_rectangle_se_x(self):
-    #     print("get_rectangle_se_x START")
-    #     id = self.table.array['BR_X0_PIX']
-    #     return id
-    #
-    # def get_rectangle_ne_x(self):
-    #     print("get_rectangle_ne_x START")
-    #     id = self.table.array['BR_X1_PIX']
-    #     return id
-    #
-    # def get_rectangle_se_y(self):
-    #     print("get_rectangle_se_y START")
-    #     id = self.table.array['BR_Y0_PIX']
-    #     return id
-    #
-    # def get_rectangle_ne_y(self):
-    #     print("get_rectangle_ne_y START")
-    #     id = self.table.array['BR_Y1_PIX']
-    #     return id
-    #
-    # def get_rectangle_nw_x(self):
-    #     print("get_rectangle_nw_x START")
-    #     id = self.table.array['BR_X3_PIX']
-    #     return id
-    #
-    # def get_rectangle_nw_y(self):
-    #     print("get_rectangle_nw_y START")
-    #     id = self.table.array['BR_Y3_PIX']
-    #     return id
-    #
-    # def get_center_x(self):
-    #     id = self.table.array['CENTER_X']
-    #     return id
-    #
-    # def get_center_y(self):
-    #     id = self.table.array['CENTER_Y']
-    #     return id
-    #
-    # def get_radius(self):
-    #     id = self.table.array['R_SUN']
-    #     return id
-    #
-    # def dimension1(self):
-    #     id = self.table.array['NAXIS2']
-    #     return id
+    # Returns longitude of gravity center of an object
+    def get_grav_center_long(self):
+        center = self.table.array['FEAT_CARR_LONG_DEG']
+        return center
+
+    # Returns latitude of gravity center of an object
+    def get_grav_center_lat(self):
+        center = self.table.array['FEAT_CARR_LAT_DEG']
+        return center
 
 
 if __name__ == '__main__':
     # DataAccess unit testing
-    ar = DataAccess('2003-10-06T08:54:09', '2003-10-09T10:54:09', 'AR', 'SOHO', 'MDI')
-    sp = DataAccess('2003-10-06T08:54:09', '2003-10-09T10:54:09', 'SP', 'SOHO', 'MDI')
-    fil = DataAccess('2003-10-06T08:54:09', '2003-10-09T10:54:09', 'FIL', 'MEUDON', 'SPECTROHELIOGRAPH')
+    ar = DataAccess('2003-09-26T00:00:00', '2003-09-26T01:00:00', 'AR', 'SOHO', 'MDI')
+    sp = DataAccess('2003-10-06T08:54:09', '2003-10-07T10:54:09', 'SP', 'SOHO', 'MDI')
+    fil = DataAccess('2003-10-06T08:54:09', '2003-10-08T10:54:09', 'FIL', 'MEUDON', 'SPECTROHELIOGRAPH')
 
     print('get_filename() TEST', ar.get_filename())
     print('get_chain_code() TEST', ar.get_chain_code())
@@ -146,6 +100,8 @@ if __name__ == '__main__':
     print('get_ar_id() TEST', ar.get_ar_id())
     print('get_sp_id() TEST', sp.get_sp_id())
     print('get_fil_id() TEST', fil.get_fil_id())
+    print('get_grav_center_long() TEST',fil.get_grav_center_long())
+    print('get_grav_center_lat() TEST', fil.get_grav_center_lat())
 
 
 

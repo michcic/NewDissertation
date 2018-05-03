@@ -154,16 +154,21 @@ if __name__ == '__main__':
     print("load_sp_from_database() TEST", load_sp_from_database(sp_id))
     print("load_fil_from_database() TEST", load_fl_from_database(fil_id))
 
+    print("----------------------------------------------------------------")
 
+    add_ar_to_database(1, 2, 4, 3, [22], [33])
+    print(load_ar_from_database(1))
+    add_sunspot_to_database(1, 2, [22], [33])
+    print(load_sp_from_database(1))
+    add_fl_to_database(1, 2, 3, [22], [33])
+    print(load_fl_from_database(1))
 
-    # conn = sqlite3.connect('map.db')
-    # curs = conn.cursor()
-    # # c = curs.execute('''PRAGMA table_info(ar_test2) ''')
-    # # curs.execute('''CREATE TABLE filaments(fl_id PRIMARY KEY, date, track_id, carrington_coordinates, pixel_coordinates)''')
-    # # curs.execute('''DROP TABLE filaments''')
-    # # curs.execute('''DELETE from filaments''')
-    # # curs.execute('''ALTER TABLE filaments ADD COLUMN chain_code''')
-    # # for r in c:
-    # #     print(r)
-    # conn.commit()
-    # conn.close()
+    # Delete data created for testing
+    conn = sqlite3.connect('map.db')
+    curs = conn.cursor()
+    curs.execute('''DELETE from filaments WHERE fl_id=?''', ("1",))
+    curs.execute('''DELETE from sunspots WHERE sp_id=?''', ("1",))
+    curs.execute('''DELETE from ar_test2 WHERE ar_id=?''', ("1",))
+
+    conn.commit()
+    conn.close()

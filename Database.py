@@ -157,11 +157,11 @@ if __name__ == '__main__':
     print("----------------------------------------------------------------")
 
     add_ar_to_database(1, 2, 4, 3, [22], [33])
-    print(load_ar_from_database(1))
+    print("add_ar_to_database() TEST", load_ar_from_database(1))
     add_sunspot_to_database(1, 2, [22], [33])
-    print(load_sp_from_database(1))
+    print("add_sp_to_database() TEST", load_sp_from_database(1))
     add_fl_to_database(1, 2, 3, [22], [33])
-    print(load_fl_from_database(1))
+    print("add_fil_to_database() TEST", load_fl_from_database(1))
 
     # Delete data created for testing
     conn = sqlite3.connect('map.db')

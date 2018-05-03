@@ -140,7 +140,14 @@ if __name__ == '__main__':
     from DataAccess import DataAccess
 
     ar_data = DataAccess('2003-10-24T00:00:00', '2003-10-24T02:00:00', 'AR', 'SOHO', 'MDI')
+    chain = decode_and_split(ar_data.get_chain_code())
+    date = decode_date(ar_data.get_date())
+    filename = decode_filename(ar_data.get_filename())
 
-    print("decode_and_split() TEST", decode_and_split(ar_data.get_chain_code()))
-    print("decode_date() TEST", decode_date(ar_data.get_date()))
-    print("decode_filename() TEST", decode_filename(ar_data.get_filename()))
+    print("CHAIN_CODE", type(chain[0][0]))
+    print("DATE", type(date[0]))
+    print("FILENAME", type(filename[0]))
+
+    print("decode_and_split() TEST", chain)
+    print("decode_date() TEST", date)
+    print("decode_filename() TEST", filename)

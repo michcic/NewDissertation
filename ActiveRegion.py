@@ -61,7 +61,7 @@ def get_shapes(chains, startx, starty, filename, track_id, ar_id, date):
         counter += 1
 
     mer = merge_id_with_object(all_coords_carr, all_contours_pix, all_track, all_intensities)
-    carrington_synthesis, pixel_synthesis = make_synthesis(mer)
+    carrington_synthesis, pixel_synthesis = make_ar_synthesis(mer)
 
     return carrington_synthesis, pixel_synthesis
 
@@ -88,7 +88,7 @@ def merge_id_with_object(carr_coords, pix_coords,  track_id, ar_intensity):
 # Function checks then which pixels are black and reveal indexes of these pixels
 def get_contour_pixels_indexes(contour):
     contour = np.array(contour)
-    im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image of FITS image size
+    im = Image.new('RGB', (4096, 4096), (0, 0, 0))  # create blank image
     cv_image = np.array(im)  # convert PIL image to opencv image
     cv2.fillPoly(cv_image, pts=[contour], color=(255, 255, 255))  # draw active region
     indexes = np.where(cv_image == 255)  # get all indexes of active region pixels
@@ -100,7 +100,7 @@ def get_contour_pixels_indexes(contour):
 # filename - FITS file associated with that ar
 def calculate_ar_intensity(coord, filename):
     filename = "images//" + filename
-    coord = get_contour_pixels_indexes(coord, filename)  # find all pixels inside the contour
+    coord = get_contour_pixels_indexes(coord)  # find all pixels inside the contour
     pixels_number = len(coord)
     intensity = 0.0
     map = sunpy.map.Map(filename)
@@ -115,7 +115,7 @@ def calculate_ar_intensity(coord, filename):
 # Goes through dictionary, calculates the intensity of each AR
 # makes synthesis by calculating the average of the same AR and by
 # choosing the closest AR to the average
-def make_synthesis(ar_with_id):
+def make_ar_synthesis(ar_with_id):
     all_contours_carr = []
     all_contours_pix = []
     for id, coords in ar_with_id.items():
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     # ActiveRegion + ObjectPreparation test
     from DataAccess import DataAccess
 
-    ar_data = DataAccess('2003-10-24T00:00:00', '2003-10-24T02:00:00', 'AR', 'SOHO', 'MDI')
+    ar_data = DataAccess('2003-10-21T00:00:00', '2003-10-24T00:00:00', 'AR', 'SOHO', 'MDI')
 
     ar_chain_encoded = prep.decode_and_split(ar_data.get_chain_code())
 
@@ -163,6 +163,4 @@ if __name__ == '__main__':
                                                      ar_data.get_pixel_start_y(), ar_data.get_filename(),
                                                ar_data.get_noaa_number(), ar_data.get_ar_id(), ar_data.get_date())
 
-    from ObjectPreparation import display_object
-
-    display_object(ar_carr_synthesis, [])
+    prep.display_object(ar_carr_synthesis, [])
